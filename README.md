@@ -1,2 +1,2 @@
-# TastebudKitchen
+# tastebudkitchen
 Cooking/Sharing/planning App
