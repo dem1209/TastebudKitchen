@@ -107,6 +107,58 @@
         font-size: 14px;
     }
     
+    /* Search */
+    .search-container {
+        position: relative;
+        margin: 24px 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 16px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: white;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FF6B35;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .chip.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+    
     /* Hero */
     .hero {
         background: linear-gradient(135deg, #FF6B35, #E85A2B);
@@ -154,6 +206,7 @@
         overflow: hidden;
         transition: all 0.3s;
         position: relative;
+        cursor: pointer;
     }
     .recipe-card:hover {
         transform: translateY(-4px);
@@ -178,6 +231,7 @@
         border-radius: 20px;
         font-size: 12px;
         font-weight: 600;
+        z-index: 2;
     }
     .tag {
         padding: 4px 12px;
@@ -186,6 +240,26 @@
         font-size: 12px;
         display: inline-block;
         margin-right: 8px;
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .spinner {
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #FF6B35;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
     
     /* Bottom Nav */
@@ -332,7 +406,421 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// Firebase Config - Note: These keys are meant to be public! They're secured by Firebase Security Rules.
+// ==================== CONFIG ====================
+// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
+const SPOONACULAR_API_KEY = '<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenQuest</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #FAFAFA;
+        color: #1A1A1A;
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    /* Auth Screen */
+    .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .auth-logo {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .auth-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        color: white;
+        font-size: 15px;
+    }
+    .auth-btn-primary { background: #FF6B35; }
+    .auth-btn-secondary { background: #04E762; }
+    .auth-error {
+        color: #FF1744;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .auth-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #666;
+        font-size: 14px;
+    }
+    .auth-link button {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    
+    /* App Header */
+    .app-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 1px solid #E0E0E0;
+        padding: 16px 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: 2px solid #E0E0E0;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    /* Search */
+    .search-container {
+        position: relative;
+        margin: 24px 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 16px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: white;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FF6B35;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .chip.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+    
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #FF6B35, #E85A2B);
+        border-radius: 16px;
+        padding: 40px;
+        margin: 24px 0;
+        color: white;
+    }
+    .hero h1 { font-size: 32px; margin-bottom: 8px; }
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .hero-stat {
+        background: rgba(255,255,255,0.15);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .hero-stat-value { font-size: 28px; font-weight: 700; }
+    .hero-stat-label { font-size: 14px; margin-top: 4px; }
+    
+    /* Cards */
+    .card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    
+    /* Recipe Grid */
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 24px 0;
+    }
+    .recipe-card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    .recipe-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .recipe-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #F5F5F5;
+    }
+    .recipe-content { padding: 20px; }
+    .recipe-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .recipe-meta { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .saved-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #04E762;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .tag {
+        padding: 4px 12px;
+        background: #F5F5F5;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .spinner {
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #FF6B35;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #E0E0E0;
+        padding: 12px 0;
+        z-index: 100;
+    }
+    .nav-items {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        border: none;
+        background: none;
+        color: #999;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .nav-item.active {
+        color: #FF6B35;
+        background: rgba(255, 107, 53, 0.1);
+    }
+    
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        z-index: 2000;
+        display: none;
+        font-weight: 600;
+    }
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(400px); }
+        to { transform: translateX(0); }
+    }
+    
+    #app-content { display: none; }
+    #app-content.show { display: block; }
+    
+    @media (max-width: 768px) {
+        .hero-stats { grid-template-columns: 1fr; }
+        .recipe-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <div class="auth-logo">🍳 KitchenQuest</div>
+        
+        <div id="signin-form">
+            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+            <div class="auth-link">
+                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+            </div>
+        </div>
+        
+        <div id="signup-form" style="display:none;">
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
+            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
+            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+            <div class="auth-link">
+                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
+            </div>
+        </div>
+        
+        <p id="auth-error" class="auth-error"></p>
+    </div>
+</div>
+
+<!-- App Content -->
+<div id="app-content">
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">KitchenQuest</div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="color:#666;font-size:14px;" id="user-display">👨‍🍳 Chef</span>
+                    <button class="btn" id="signout-btn">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container" id="main-content"></main>
+    
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" data-page="home">
+                <span style="font-size:24px;">🏠</span>
+                <span style="font-size:12px;font-weight:600;">Home</span>
+            </button>
+            <button class="nav-item" data-page="discover">
+                <span style="font-size:24px;">🔍</span>
+                <span style="font-size:12px;font-weight:600;">Discover</span>
+            </button>
+            <button class="nav-item" data-page="cookbook">
+                <span style="font-size:24px;">📖</span>
+                <span style="font-size:12px;font-weight:600;">Cookbook</span>
+            </button>
+            <button class="nav-item" data-page="pantry">
+                <span style="font-size:24px;">📦</span>
+                <span style="font-size:12px;font-weight:600;">Pantry</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<div id="toast" class="toast">
+    <div id="toast-message"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ==================== CONFIG ====================
+// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
+const SPOONACULAR_API_KEY = 'YOUR_API_KEY_HERE';
+
+// Firebase Config - These keys are public by design, secured by Firebase Rules
 const firebaseConfig = {
     apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
     authDomain: "kitchenquest-pro.firebaseapp.com",
@@ -346,7 +834,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// State
+// ==================== STATE ====================
 let state = {
     user: {
         id: null,
@@ -360,7 +848,51 @@ let state = {
     cookbook: [],
     pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
     currentPage: 'home',
-    discoveredRecipes: [
+    discoveredRecipes: [],
+    searchQuery: '',
+    selectedCuisine: '',
+    isLoading: false
+};
+
+// ==================== API FUNCTIONS ====================
+async function searchRecipes(query = '', cuisine = '') {
+    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
+        showToast('⚠️ Please add your Spoonacular API key');
+        return loadDemoRecipes();
+    }
+    
+    state.isLoading = true;
+    render();
+    
+    try {
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_API_KEY}&number=12&addRecipeInformation=true`;
+        
+        if (query) url += `&query=${encodeURIComponent(query)}`;
+        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        state.discoveredRecipes = data.results.map(r => ({
+            id: r.id,
+            title: r.title,
+            image: r.image,
+            readyInMinutes: r.readyInMinutes,
+            cuisines: r.cuisines || []
+        }));
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast('Search failed. Using demo recipes.');
+        loadDemoRecipes();
+    }
+    
+    state.isLoading = false;
+    render();
+}
+
+function loadDemoRecipes() {
+    state.discoveredRecipes = [
         {
             id: 1,
             title: "Pasta Carbonara",
@@ -403,10 +935,10 @@ let state = {
             readyInMinutes: 20,
             cuisines: ["Japanese"]
         }
-    ]
-};
+    ];
+}
 
-// Auth Mode Toggle
+// ==================== AUTH ====================
 function toggleAuthMode() {
     const signinForm = document.getElementById('signin-form');
     const signupForm = document.getElementById('signup-form');
@@ -421,7 +953,6 @@ function toggleAuthMode() {
     }
 }
 
-// Sign Up
 document.getElementById('signup-btn').addEventListener('click', async () => {
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
@@ -459,7 +990,6 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
     }
 });
 
-// Sign In
 document.getElementById('signin-btn').addEventListener('click', async () => {
     const email = document.getElementById('signin-email').value;
     const password = document.getElementById('signin-password').value;
@@ -475,16 +1005,13 @@ document.getElementById('signin-btn').addEventListener('click', async () => {
     }
 });
 
-// Sign Out
 document.getElementById('signout-btn').addEventListener('click', () => {
     auth.signOut();
     showToast('Signed out');
 });
 
-// Auth State Observer
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        console.log('User signed in:', user.email);
         state.user.id = user.uid;
         state.user.email = user.email;
         
@@ -493,7 +1020,6 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-content').classList.add('show');
         
-        // Load user data
         try {
             const doc = await db.collection('users').doc(user.uid).get();
             if (doc.exists) {
@@ -506,19 +1032,23 @@ auth.onAuthStateChanged(async (user) => {
             console.error('Error loading user data:', error);
         }
         
+        // Load initial recipes
+        if (state.discoveredRecipes.length === 0) {
+            await searchRecipes();
+        }
+        
         init();
     } else {
-        console.log('No user signed in');
         document.getElementById('auth-screen').style.display = 'block';
         document.getElementById('app-content').classList.remove('show');
     }
 });
 
-// App Functions
+// ==================== APP FUNCTIONS ====================
 function init() {
     setupNavigation();
     render();
-    console.log('✅ KitchenQuest Ready!');
+    console.log('✅ KitchenQuest Ready with Recipe Search!');
 }
 
 function setupNavigation() {
@@ -531,6 +1061,17 @@ function setupNavigation() {
             render();
         });
     });
+}
+
+function handleSearch() {
+    const query = document.getElementById('recipe-search-input').value;
+    state.searchQuery = query;
+    searchRecipes(query, state.selectedCuisine);
+}
+
+function selectCuisine(cuisine) {
+    state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
+    searchRecipes(state.searchQuery, state.selectedCuisine);
 }
 
 function render() {
@@ -565,26 +1106,61 @@ function render() {
             </div>
         `;
     } else if (state.currentPage === 'discover') {
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        
         content.innerHTML = `
             <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
-            <div class="recipe-grid">
-                ${state.discoveredRecipes.map(r => `
-                    <div class="recipe-card">
-                        ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
-                        <img src="${r.image}" class="recipe-image" alt="${r.title}">
-                        <div class="recipe-content">
-                            <h3 class="recipe-title">${r.title}</h3>
-                            <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
-                            ${r.cuisines ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
-                            <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
-                                    style="width:100%;margin-top:12px;" 
-                                    onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
-                                ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
-                            </button>
-                        </div>
-                    </div>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="recipe-search-input" 
+                       class="search-input" 
+                       placeholder="Search recipes... (pasta, chicken, salad)"
+                       value="${state.searchQuery}"
+                       onkeypress="if(event.key==='Enter')handleSearch()">
+                <button class="search-btn" onclick="handleSearch()">Search</button>
+            </div>
+            
+            <div class="filter-chips">
+                ${cuisines.map(c => `
+                    <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
+                            onclick="selectCuisine('${c}')">
+                        ${c}
+                    </button>
                 `).join('')}
             </div>
+            
+            ${state.isLoading ? `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching recipes...</p>
+                </div>
+            ` : state.discoveredRecipes.length === 0 ? `
+                <div class="card" style="text-align:center;padding:40px;">
+                    <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                    <h2>No recipes found</h2>
+                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                </div>
+            ` : `
+                <div class="recipe-grid">
+                    ${state.discoveredRecipes.map(r => `
+                        <div class="recipe-card">
+                            ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
+                                        style="width:100%;margin-top:12px;" 
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                    ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
         `;
     } else if (state.currentPage === 'cookbook') {
         if (state.cookbook.length === 0) {
@@ -698,7 +1274,3081 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest Loaded - Email/Password Auth Only');
+console.log('🍳 KitchenQuest with Recipe Search Ready!');
+</script>
+
+</body>
+</html>
+>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenQuest</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #FAFAFA;
+        color: #1A1A1A;
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    /* Auth Screen */
+    .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .auth-logo {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .auth-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        color: white;
+        font-size: 15px;
+    }
+    .auth-btn-primary { background: #FF6B35; }
+    .auth-btn-secondary { background: #04E762; }
+    .auth-error {
+        color: #FF1744;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .auth-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #666;
+        font-size: 14px;
+    }
+    .auth-link button {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    
+    /* App Header */
+    .app-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 1px solid #E0E0E0;
+        padding: 16px 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: 2px solid #E0E0E0;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    /* Search */
+    .search-container {
+        position: relative;
+        margin: 24px 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 16px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: white;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FF6B35;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .chip.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+    
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #FF6B35, #E85A2B);
+        border-radius: 16px;
+        padding: 40px;
+        margin: 24px 0;
+        color: white;
+    }
+    .hero h1 { font-size: 32px; margin-bottom: 8px; }
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .hero-stat {
+        background: rgba(255,255,255,0.15);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .hero-stat-value { font-size: 28px; font-weight: 700; }
+    .hero-stat-label { font-size: 14px; margin-top: 4px; }
+    
+    /* Cards */
+    .card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    
+    /* Recipe Grid */
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 24px 0;
+    }
+    .recipe-card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    .recipe-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .recipe-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #F5F5F5;
+    }
+    .recipe-content { padding: 20px; }
+    .recipe-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .recipe-meta { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .saved-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #04E762;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .tag {
+        padding: 4px 12px;
+        background: #F5F5F5;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .spinner {
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #FF6B35;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #E0E0E0;
+        padding: 12px 0;
+        z-index: 100;
+    }
+    .nav-items {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        border: none;
+        background: none;
+        color: #999;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .nav-item.active {
+        color: #FF6B35;
+        background: rgba(255, 107, 53, 0.1);
+    }
+    
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        z-index: 2000;
+        display: none;
+        font-weight: 600;
+    }
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(400px); }
+        to { transform: translateX(0); }
+    }
+    
+    #app-content { display: none; }
+    #app-content.show { display: block; }
+    
+    @media (max-width: 768px) {
+        .hero-stats { grid-template-columns: 1fr; }
+        .recipe-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <div class="auth-logo">🍳 KitchenQuest</div>
+        
+        <div id="signin-form">
+            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+            <div class="auth-link">
+                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+            </div>
+        </div>
+        
+        <div id="signup-form" style="display:none;">
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
+            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
+            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+            <div class="auth-link">
+                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
+            </div>
+        </div>
+        
+        <p id="auth-error" class="auth-error"></p>
+    </div>
+</div>
+
+<!-- App Content -->
+<div id="app-content">
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">KitchenQuest</div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="color:#666;font-size:14px;" id="user-display">👨‍🍳 Chef</span>
+                    <button class="btn" id="signout-btn">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container" id="main-content"></main>
+    
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" data-page="home">
+                <span style="font-size:24px;">🏠</span>
+                <span style="font-size:12px;font-weight:600;">Home</span>
+            </button>
+            <button class="nav-item" data-page="discover">
+                <span style="font-size:24px;">🔍</span>
+                <span style="font-size:12px;font-weight:600;">Discover</span>
+            </button>
+            <button class="nav-item" data-page="cookbook">
+                <span style="font-size:24px;">📖</span>
+                <span style="font-size:12px;font-weight:600;">Cookbook</span>
+            </button>
+            <button class="nav-item" data-page="pantry">
+                <span style="font-size:24px;">📦</span>
+                <span style="font-size:12px;font-weight:600;">Pantry</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<div id="toast" class="toast">
+    <div id="toast-message"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ==================== CONFIG ====================
+// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
+const SPOONACULAR_API_KEY = 'YOUR_API_KEY_HERE';
+
+// Firebase Config - These keys are public by design, secured by Firebase Rules
+const firebaseConfig = {
+    apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
+    authDomain: "kitchenquest-pro.firebaseapp.com",
+    projectId: "kitchenquest-pro",
+    storageBucket: "kitchenquest-pro.firebasestorage.app",
+    messagingSenderId: "1051745419180",
+    appId: "1:1051745419180:web:d314309e15003d89dd0409"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==================== STATE ====================
+let state = {
+    user: {
+        id: null,
+        email: null,
+        name: 'Chef',
+        level: 1,
+        xp: 0,
+        xpToNext: 500,
+        totalMealsCooked: 0
+    },
+    cookbook: [],
+    pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
+    currentPage: 'home',
+    discoveredRecipes: [],
+    searchQuery: '',
+    selectedCuisine: '',
+    isLoading: false
+};
+
+// ==================== API FUNCTIONS ====================
+async function searchRecipes(query = '', cuisine = '') {
+    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
+        showToast('⚠️ Please add your Spoonacular API key');
+        return loadDemoRecipes();
+    }
+    
+    state.isLoading = true;
+    render();
+    
+    try {
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_API_KEY}&number=12&addRecipeInformation=true`;
+        
+        if (query) url += `&query=${encodeURIComponent(query)}`;
+        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        state.discoveredRecipes = data.results.map(r => ({
+            id: r.id,
+            title: r.title,
+            image: r.image,
+            readyInMinutes: r.readyInMinutes,
+            cuisines: r.cuisines || []
+        }));
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast('Search failed. Using demo recipes.');
+        loadDemoRecipes();
+    }
+    
+    state.isLoading = false;
+    render();
+}
+
+function loadDemoRecipes() {
+    state.discoveredRecipes = [
+        {
+            id: 1,
+            title: "Pasta Carbonara",
+            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 2,
+            title: "Chicken Stir Fry",
+            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Asian"]
+        },
+        {
+            id: 3,
+            title: "Greek Salad",
+            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
+            readyInMinutes: 15,
+            cuisines: ["Greek"]
+        },
+        {
+            id: 4,
+            title: "Beef Tacos",
+            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Mexican"]
+        },
+        {
+            id: 5,
+            title: "Margherita Pizza",
+            image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+            readyInMinutes: 30,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 6,
+            title: "Salmon Teriyaki",
+            image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Japanese"]
+        }
+    ];
+}
+
+// ==================== AUTH ====================
+function toggleAuthMode() {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    document.getElementById('auth-error').textContent = '';
+    
+    if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    }
+}
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    if (password !== confirmPassword) {
+        authError.textContent = 'Passwords do not match';
+        return;
+    }
+    
+    if (password.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters';
+        return;
+    }
+    
+    try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(result.user.uid).set({
+            email: result.user.email,
+            name: 'Chef',
+            level: 1,
+            xp: 0,
+            xpToNext: 500,
+            pantry: state.pantry,
+            cookbook: [],
+            totalMealsCooked: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Account created! 🎉');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showToast('Welcome back! 👋');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+    auth.signOut();
+    showToast('Signed out');
+});
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        state.user.id = user.uid;
+        state.user.email = user.email;
+        
+        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').classList.add('show');
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                state.user = { ...state.user, ...data };
+                state.pantry = data.pantry || state.pantry;
+                state.cookbook = data.cookbook || [];
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+        
+        // Load initial recipes
+        if (state.discoveredRecipes.length === 0) {
+            await searchRecipes();
+        }
+        
+        init();
+    } else {
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('app-content').classList.remove('show');
+    }
+});
+
+// ==================== APP FUNCTIONS ====================
+function init() {
+    setupNavigation();
+    render();
+    console.log('✅ KitchenQuest Ready with Recipe Search!');
+}
+
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.getAttribute('data-page');
+            state.currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            render();
+        });
+    });
+}
+
+function handleSearch() {
+    const query = document.getElementById('recipe-search-input').value;
+    state.searchQuery = query;
+    searchRecipes(query, state.selectedCuisine);
+}
+
+function selectCuisine(cuisine) {
+    state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
+    searchRecipes(state.searchQuery, state.selectedCuisine);
+}
+
+function render() {
+    const content = document.getElementById('main-content');
+    
+    if (state.currentPage === 'home') {
+        content.innerHTML = `
+            <div class="hero">
+                <h1>Welcome, ${state.user.name}! 👋</h1>
+                <p>Level ${state.user.level} Chef</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
+                        <div class="hero-stat-label">Meals Cooked</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.cookbook.length}</div>
+                        <div class="hero-stat-label">Saved Recipes</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.pantry.length}</div>
+                        <div class="hero-stat-label">Pantry Items</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🍳 Quick Start</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px;">
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                    <button class="auth-btn auth-btn-secondary" onclick="navigateTo('cookbook')">My Cookbook (${state.cookbook.length})</button>
+                </div>
+            </div>
+        `;
+    } else if (state.currentPage === 'discover') {
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="recipe-search-input" 
+                       class="search-input" 
+                       placeholder="Search recipes... (pasta, chicken, salad)"
+                       value="${state.searchQuery}"
+                       onkeypress="if(event.key==='Enter')handleSearch()">
+                <button class="search-btn" onclick="handleSearch()">Search</button>
+            </div>
+            
+            <div class="filter-chips">
+                ${cuisines.map(c => `
+                    <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
+                            onclick="selectCuisine('${c}')">
+                        ${c}
+                    </button>
+                `).join('')}
+            </div>
+            
+            ${state.isLoading ? `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching recipes...</p>
+                </div>
+            ` : state.discoveredRecipes.length === 0 ? `
+                <div class="card" style="text-align:center;padding:40px;">
+                    <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                    <h2>No recipes found</h2>
+                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                </div>
+            ` : `
+                <div class="recipe-grid">
+                    ${state.discoveredRecipes.map(r => `
+                        <div class="recipe-card">
+                            ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
+                                        style="width:100%;margin-top:12px;" 
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                    ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+    } else if (state.currentPage === 'cookbook') {
+        if (state.cookbook.length === 0) {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card" style="text-align:center;padding:60px 20px;">
+                    <div style="font-size:64px;margin-bottom:16px;">📖</div>
+                    <h2>Your cookbook is empty</h2>
+                    <p style="color:#666;margin:16px 0;">Start discovering and saving recipes!</p>
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card">
+                    <p>${state.cookbook.length} recipes saved • Synced to cloud ☁️</p>
+                </div>
+                <div class="recipe-grid">
+                    ${state.cookbook.map(r => `
+                        <div class="recipe-card">
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
+                                    🔥 Cook This (+50 XP)
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (state.currentPage === 'pantry') {
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">📦 Your Pantry</h1>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">${state.pantry.length} Ingredients</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+                    ${state.pantry.map(item => `
+                        <div style="padding:16px;background:#F5F5F5;border-radius:12px;text-align:center;">
+                            <div style="font-size:32px;margin-bottom:4px;">🥘</div>
+                            <div style="font-size:14px;font-weight:600;">${item}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function navigateTo(page) {
+    state.currentPage = page;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    render();
+}
+
+async function saveRecipe(id) {
+    const recipe = state.discoveredRecipes.find(r => r.id === id);
+    if (recipe && !state.cookbook.find(r => r.id === id)) {
+        state.cookbook.push(recipe);
+        await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+        showToast(`Saved ${recipe.title}!`);
+        render();
+    }
+}
+
+async function removeRecipe(id) {
+    state.cookbook = state.cookbook.filter(r => r.id !== id);
+    await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+    showToast('Recipe removed');
+    render();
+}
+
+async function cookRecipe(id) {
+    const recipe = state.cookbook.find(r => r.id === id);
+    if (recipe) {
+        state.user.xp += 50;
+        state.user.totalMealsCooked++;
+        
+        if (state.user.xp >= state.user.xpToNext) {
+            state.user.level++;
+            state.user.xp = 0;
+            state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
+            showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
+        } else {
+            showToast(`Cooked ${recipe.title}! +50 XP`);
+        }
+        
+        await db.collection('users').doc(state.user.id).update({
+            xp: state.user.xp,
+            level: state.user.level,
+            xpToNext: state.user.xpToNext,
+            totalMealsCooked: state.user.totalMealsCooked
+        });
+        
+        render();
+    }
+}
+
+function showToast(message) {
+    document.getElementById('toast-message').textContent = message;
+    document.getElementById('toast').classList.add('show');
+    setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+}
+
+console.log('🍳 KitchenQuest with Recipe Search Ready!');
+</script>
+
+</body>
+</html>
+';
+
+// Firebase Config - These keys are public by design, secured by Firebase Rules
+const firebaseConfig = {
+    apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
+    authDomain: "kitchenquest-pro.firebaseapp.com",
+    projectId: "kitchenquest-pro",
+    storageBucket: "kitchenquest-pro.firebasestorage.app",
+    messagingSenderId: "1051745419180",
+    appId: "1:1051745419180:web:d314309e15003d89dd0409"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==================== STATE ====================
+let state = {
+    user: {
+        id: null,
+        email: null,
+        name: 'Chef',
+        level: 1,
+        xp: 0,
+        xpToNext: 500,
+        totalMealsCooked: 0
+    },
+    cookbook: [],
+    pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
+    currentPage: 'home',
+    discoveredRecipes: [],
+    searchQuery: '',
+    selectedCuisine: '',
+    isLoading: false
+};
+
+// ==================== API FUNCTIONS ====================
+async function searchRecipes(query = '', cuisine = '') {
+    if (SPOONACULAR_API_KEY === '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenQuest</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #FAFAFA;
+        color: #1A1A1A;
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    /* Auth Screen */
+    .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .auth-logo {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .auth-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        color: white;
+        font-size: 15px;
+    }
+    .auth-btn-primary { background: #FF6B35; }
+    .auth-btn-secondary { background: #04E762; }
+    .auth-error {
+        color: #FF1744;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .auth-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #666;
+        font-size: 14px;
+    }
+    .auth-link button {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    
+    /* App Header */
+    .app-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 1px solid #E0E0E0;
+        padding: 16px 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: 2px solid #E0E0E0;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    /* Search */
+    .search-container {
+        position: relative;
+        margin: 24px 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 16px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: white;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FF6B35;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .chip.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+    
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #FF6B35, #E85A2B);
+        border-radius: 16px;
+        padding: 40px;
+        margin: 24px 0;
+        color: white;
+    }
+    .hero h1 { font-size: 32px; margin-bottom: 8px; }
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .hero-stat {
+        background: rgba(255,255,255,0.15);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .hero-stat-value { font-size: 28px; font-weight: 700; }
+    .hero-stat-label { font-size: 14px; margin-top: 4px; }
+    
+    /* Cards */
+    .card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    
+    /* Recipe Grid */
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 24px 0;
+    }
+    .recipe-card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    .recipe-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .recipe-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #F5F5F5;
+    }
+    .recipe-content { padding: 20px; }
+    .recipe-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .recipe-meta { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .saved-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #04E762;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .tag {
+        padding: 4px 12px;
+        background: #F5F5F5;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .spinner {
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #FF6B35;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #E0E0E0;
+        padding: 12px 0;
+        z-index: 100;
+    }
+    .nav-items {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        border: none;
+        background: none;
+        color: #999;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .nav-item.active {
+        color: #FF6B35;
+        background: rgba(255, 107, 53, 0.1);
+    }
+    
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        z-index: 2000;
+        display: none;
+        font-weight: 600;
+    }
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(400px); }
+        to { transform: translateX(0); }
+    }
+    
+    #app-content { display: none; }
+    #app-content.show { display: block; }
+    
+    @media (max-width: 768px) {
+        .hero-stats { grid-template-columns: 1fr; }
+        .recipe-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <div class="auth-logo">🍳 KitchenQuest</div>
+        
+        <div id="signin-form">
+            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+            <div class="auth-link">
+                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+            </div>
+        </div>
+        
+        <div id="signup-form" style="display:none;">
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
+            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
+            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+            <div class="auth-link">
+                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
+            </div>
+        </div>
+        
+        <p id="auth-error" class="auth-error"></p>
+    </div>
+</div>
+
+<!-- App Content -->
+<div id="app-content">
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">KitchenQuest</div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="color:#666;font-size:14px;" id="user-display">👨‍🍳 Chef</span>
+                    <button class="btn" id="signout-btn">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container" id="main-content"></main>
+    
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" data-page="home">
+                <span style="font-size:24px;">🏠</span>
+                <span style="font-size:12px;font-weight:600;">Home</span>
+            </button>
+            <button class="nav-item" data-page="discover">
+                <span style="font-size:24px;">🔍</span>
+                <span style="font-size:12px;font-weight:600;">Discover</span>
+            </button>
+            <button class="nav-item" data-page="cookbook">
+                <span style="font-size:24px;">📖</span>
+                <span style="font-size:12px;font-weight:600;">Cookbook</span>
+            </button>
+            <button class="nav-item" data-page="pantry">
+                <span style="font-size:24px;">📦</span>
+                <span style="font-size:12px;font-weight:600;">Pantry</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<div id="toast" class="toast">
+    <div id="toast-message"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ==================== CONFIG ====================
+// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
+const SPOONACULAR_API_KEY = 'YOUR_API_KEY_HERE';
+
+// Firebase Config - These keys are public by design, secured by Firebase Rules
+const firebaseConfig = {
+    apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
+    authDomain: "kitchenquest-pro.firebaseapp.com",
+    projectId: "kitchenquest-pro",
+    storageBucket: "kitchenquest-pro.firebasestorage.app",
+    messagingSenderId: "1051745419180",
+    appId: "1:1051745419180:web:d314309e15003d89dd0409"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==================== STATE ====================
+let state = {
+    user: {
+        id: null,
+        email: null,
+        name: 'Chef',
+        level: 1,
+        xp: 0,
+        xpToNext: 500,
+        totalMealsCooked: 0
+    },
+    cookbook: [],
+    pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
+    currentPage: 'home',
+    discoveredRecipes: [],
+    searchQuery: '',
+    selectedCuisine: '',
+    isLoading: false
+};
+
+// ==================== API FUNCTIONS ====================
+async function searchRecipes(query = '', cuisine = '') {
+    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
+        showToast('⚠️ Please add your Spoonacular API key');
+        return loadDemoRecipes();
+    }
+    
+    state.isLoading = true;
+    render();
+    
+    try {
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_API_KEY}&number=12&addRecipeInformation=true`;
+        
+        if (query) url += `&query=${encodeURIComponent(query)}`;
+        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        state.discoveredRecipes = data.results.map(r => ({
+            id: r.id,
+            title: r.title,
+            image: r.image,
+            readyInMinutes: r.readyInMinutes,
+            cuisines: r.cuisines || []
+        }));
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast('Search failed. Using demo recipes.');
+        loadDemoRecipes();
+    }
+    
+    state.isLoading = false;
+    render();
+}
+
+function loadDemoRecipes() {
+    state.discoveredRecipes = [
+        {
+            id: 1,
+            title: "Pasta Carbonara",
+            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 2,
+            title: "Chicken Stir Fry",
+            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Asian"]
+        },
+        {
+            id: 3,
+            title: "Greek Salad",
+            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
+            readyInMinutes: 15,
+            cuisines: ["Greek"]
+        },
+        {
+            id: 4,
+            title: "Beef Tacos",
+            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Mexican"]
+        },
+        {
+            id: 5,
+            title: "Margherita Pizza",
+            image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+            readyInMinutes: 30,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 6,
+            title: "Salmon Teriyaki",
+            image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Japanese"]
+        }
+    ];
+}
+
+// ==================== AUTH ====================
+function toggleAuthMode() {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    document.getElementById('auth-error').textContent = '';
+    
+    if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    }
+}
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    if (password !== confirmPassword) {
+        authError.textContent = 'Passwords do not match';
+        return;
+    }
+    
+    if (password.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters';
+        return;
+    }
+    
+    try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(result.user.uid).set({
+            email: result.user.email,
+            name: 'Chef',
+            level: 1,
+            xp: 0,
+            xpToNext: 500,
+            pantry: state.pantry,
+            cookbook: [],
+            totalMealsCooked: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Account created! 🎉');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showToast('Welcome back! 👋');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+    auth.signOut();
+    showToast('Signed out');
+});
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        state.user.id = user.uid;
+        state.user.email = user.email;
+        
+        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').classList.add('show');
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                state.user = { ...state.user, ...data };
+                state.pantry = data.pantry || state.pantry;
+                state.cookbook = data.cookbook || [];
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+        
+        // Load initial recipes
+        if (state.discoveredRecipes.length === 0) {
+            await searchRecipes();
+        }
+        
+        init();
+    } else {
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('app-content').classList.remove('show');
+    }
+});
+
+// ==================== APP FUNCTIONS ====================
+function init() {
+    setupNavigation();
+    render();
+    console.log('✅ KitchenQuest Ready with Recipe Search!');
+}
+
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.getAttribute('data-page');
+            state.currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            render();
+        });
+    });
+}
+
+function handleSearch() {
+    const query = document.getElementById('recipe-search-input').value;
+    state.searchQuery = query;
+    searchRecipes(query, state.selectedCuisine);
+}
+
+function selectCuisine(cuisine) {
+    state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
+    searchRecipes(state.searchQuery, state.selectedCuisine);
+}
+
+function render() {
+    const content = document.getElementById('main-content');
+    
+    if (state.currentPage === 'home') {
+        content.innerHTML = `
+            <div class="hero">
+                <h1>Welcome, ${state.user.name}! 👋</h1>
+                <p>Level ${state.user.level} Chef</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
+                        <div class="hero-stat-label">Meals Cooked</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.cookbook.length}</div>
+                        <div class="hero-stat-label">Saved Recipes</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.pantry.length}</div>
+                        <div class="hero-stat-label">Pantry Items</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🍳 Quick Start</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px;">
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                    <button class="auth-btn auth-btn-secondary" onclick="navigateTo('cookbook')">My Cookbook (${state.cookbook.length})</button>
+                </div>
+            </div>
+        `;
+    } else if (state.currentPage === 'discover') {
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="recipe-search-input" 
+                       class="search-input" 
+                       placeholder="Search recipes... (pasta, chicken, salad)"
+                       value="${state.searchQuery}"
+                       onkeypress="if(event.key==='Enter')handleSearch()">
+                <button class="search-btn" onclick="handleSearch()">Search</button>
+            </div>
+            
+            <div class="filter-chips">
+                ${cuisines.map(c => `
+                    <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
+                            onclick="selectCuisine('${c}')">
+                        ${c}
+                    </button>
+                `).join('')}
+            </div>
+            
+            ${state.isLoading ? `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching recipes...</p>
+                </div>
+            ` : state.discoveredRecipes.length === 0 ? `
+                <div class="card" style="text-align:center;padding:40px;">
+                    <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                    <h2>No recipes found</h2>
+                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                </div>
+            ` : `
+                <div class="recipe-grid">
+                    ${state.discoveredRecipes.map(r => `
+                        <div class="recipe-card">
+                            ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
+                                        style="width:100%;margin-top:12px;" 
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                    ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+    } else if (state.currentPage === 'cookbook') {
+        if (state.cookbook.length === 0) {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card" style="text-align:center;padding:60px 20px;">
+                    <div style="font-size:64px;margin-bottom:16px;">📖</div>
+                    <h2>Your cookbook is empty</h2>
+                    <p style="color:#666;margin:16px 0;">Start discovering and saving recipes!</p>
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card">
+                    <p>${state.cookbook.length} recipes saved • Synced to cloud ☁️</p>
+                </div>
+                <div class="recipe-grid">
+                    ${state.cookbook.map(r => `
+                        <div class="recipe-card">
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
+                                    🔥 Cook This (+50 XP)
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (state.currentPage === 'pantry') {
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">📦 Your Pantry</h1>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">${state.pantry.length} Ingredients</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+                    ${state.pantry.map(item => `
+                        <div style="padding:16px;background:#F5F5F5;border-radius:12px;text-align:center;">
+                            <div style="font-size:32px;margin-bottom:4px;">🥘</div>
+                            <div style="font-size:14px;font-weight:600;">${item}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function navigateTo(page) {
+    state.currentPage = page;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    render();
+}
+
+async function saveRecipe(id) {
+    const recipe = state.discoveredRecipes.find(r => r.id === id);
+    if (recipe && !state.cookbook.find(r => r.id === id)) {
+        state.cookbook.push(recipe);
+        await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+        showToast(`Saved ${recipe.title}!`);
+        render();
+    }
+}
+
+async function removeRecipe(id) {
+    state.cookbook = state.cookbook.filter(r => r.id !== id);
+    await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+    showToast('Recipe removed');
+    render();
+}
+
+async function cookRecipe(id) {
+    const recipe = state.cookbook.find(r => r.id === id);
+    if (recipe) {
+        state.user.xp += 50;
+        state.user.totalMealsCooked++;
+        
+        if (state.user.xp >= state.user.xpToNext) {
+            state.user.level++;
+            state.user.xp = 0;
+            state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
+            showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
+        } else {
+            showToast(`Cooked ${recipe.title}! +50 XP`);
+        }
+        
+        await db.collection('users').doc(state.user.id).update({
+            xp: state.user.xp,
+            level: state.user.level,
+            xpToNext: state.user.xpToNext,
+            totalMealsCooked: state.user.totalMealsCooked
+        });
+        
+        render();
+    }
+}
+
+function showToast(message) {
+    document.getElementById('toast-message').textContent = message;
+    document.getElementById('toast').classList.add('show');
+    setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+}
+
+console.log('🍳 KitchenQuest with Recipe Search Ready!');
+</script>
+
+</body>
+</html>
+') {
+        showToast('⚠️ Please add your Spoonacular API key');
+        return loadDemoRecipes();
+    }
+    
+    state.isLoading = true;
+    render();
+    
+    try {
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenQuest</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #FAFAFA;
+        color: #1A1A1A;
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    /* Auth Screen */
+    .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .auth-logo {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .auth-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 12px;
+        color: white;
+        font-size: 15px;
+    }
+    .auth-btn-primary { background: #FF6B35; }
+    .auth-btn-secondary { background: #04E762; }
+    .auth-error {
+        color: #FF1744;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .auth-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #666;
+        font-size: 14px;
+    }
+    .auth-link button {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    
+    /* App Header */
+    .app-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 1px solid #E0E0E0;
+        padding: 16px 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FF6B35, #FFD23F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: 2px solid #E0E0E0;
+        background: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    /* Search */
+    .search-container {
+        position: relative;
+        margin: 24px 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 16px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: white;
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FF6B35;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .chip.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+    
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #FF6B35, #E85A2B);
+        border-radius: 16px;
+        padding: 40px;
+        margin: 24px 0;
+        color: white;
+    }
+    .hero h1 { font-size: 32px; margin-bottom: 8px; }
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .hero-stat {
+        background: rgba(255,255,255,0.15);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .hero-stat-value { font-size: 28px; font-weight: 700; }
+    .hero-stat-label { font-size: 14px; margin-top: 4px; }
+    
+    /* Cards */
+    .card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    
+    /* Recipe Grid */
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 24px 0;
+    }
+    .recipe-card {
+        background: white;
+        border: 1px solid #E0E0E0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    .recipe-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .recipe-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #F5F5F5;
+    }
+    .recipe-content { padding: 20px; }
+    .recipe-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .recipe-meta { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .saved-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #04E762;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .tag {
+        padding: 4px 12px;
+        background: #F5F5F5;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .spinner {
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #FF6B35;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #E0E0E0;
+        padding: 12px 0;
+        z-index: 100;
+    }
+    .nav-items {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        border: none;
+        background: none;
+        color: #999;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .nav-item.active {
+        color: #FF6B35;
+        background: rgba(255, 107, 53, 0.1);
+    }
+    
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        z-index: 2000;
+        display: none;
+        font-weight: 600;
+    }
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(400px); }
+        to { transform: translateX(0); }
+    }
+    
+    #app-content { display: none; }
+    #app-content.show { display: block; }
+    
+    @media (max-width: 768px) {
+        .hero-stats { grid-template-columns: 1fr; }
+        .recipe-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <div class="auth-logo">🍳 KitchenQuest</div>
+        
+        <div id="signin-form">
+            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+            <div class="auth-link">
+                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+            </div>
+        </div>
+        
+        <div id="signup-form" style="display:none;">
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
+            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
+            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+            <div class="auth-link">
+                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
+            </div>
+        </div>
+        
+        <p id="auth-error" class="auth-error"></p>
+    </div>
+</div>
+
+<!-- App Content -->
+<div id="app-content">
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">KitchenQuest</div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="color:#666;font-size:14px;" id="user-display">👨‍🍳 Chef</span>
+                    <button class="btn" id="signout-btn">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container" id="main-content"></main>
+    
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" data-page="home">
+                <span style="font-size:24px;">🏠</span>
+                <span style="font-size:12px;font-weight:600;">Home</span>
+            </button>
+            <button class="nav-item" data-page="discover">
+                <span style="font-size:24px;">🔍</span>
+                <span style="font-size:12px;font-weight:600;">Discover</span>
+            </button>
+            <button class="nav-item" data-page="cookbook">
+                <span style="font-size:24px;">📖</span>
+                <span style="font-size:12px;font-weight:600;">Cookbook</span>
+            </button>
+            <button class="nav-item" data-page="pantry">
+                <span style="font-size:24px;">📦</span>
+                <span style="font-size:12px;font-weight:600;">Pantry</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<div id="toast" class="toast">
+    <div id="toast-message"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ==================== CONFIG ====================
+// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
+const SPOONACULAR_API_KEY = 'YOUR_API_KEY_HERE';
+
+// Firebase Config - These keys are public by design, secured by Firebase Rules
+const firebaseConfig = {
+    apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
+    authDomain: "kitchenquest-pro.firebaseapp.com",
+    projectId: "kitchenquest-pro",
+    storageBucket: "kitchenquest-pro.firebasestorage.app",
+    messagingSenderId: "1051745419180",
+    appId: "1:1051745419180:web:d314309e15003d89dd0409"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==================== STATE ====================
+let state = {
+    user: {
+        id: null,
+        email: null,
+        name: 'Chef',
+        level: 1,
+        xp: 0,
+        xpToNext: 500,
+        totalMealsCooked: 0
+    },
+    cookbook: [],
+    pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
+    currentPage: 'home',
+    discoveredRecipes: [],
+    searchQuery: '',
+    selectedCuisine: '',
+    isLoading: false
+};
+
+// ==================== API FUNCTIONS ====================
+async function searchRecipes(query = '', cuisine = '') {
+    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
+        showToast('⚠️ Please add your Spoonacular API key');
+        return loadDemoRecipes();
+    }
+    
+    state.isLoading = true;
+    render();
+    
+    try {
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_API_KEY}&number=12&addRecipeInformation=true`;
+        
+        if (query) url += `&query=${encodeURIComponent(query)}`;
+        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        state.discoveredRecipes = data.results.map(r => ({
+            id: r.id,
+            title: r.title,
+            image: r.image,
+            readyInMinutes: r.readyInMinutes,
+            cuisines: r.cuisines || []
+        }));
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast('Search failed. Using demo recipes.');
+        loadDemoRecipes();
+    }
+    
+    state.isLoading = false;
+    render();
+}
+
+function loadDemoRecipes() {
+    state.discoveredRecipes = [
+        {
+            id: 1,
+            title: "Pasta Carbonara",
+            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 2,
+            title: "Chicken Stir Fry",
+            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Asian"]
+        },
+        {
+            id: 3,
+            title: "Greek Salad",
+            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
+            readyInMinutes: 15,
+            cuisines: ["Greek"]
+        },
+        {
+            id: 4,
+            title: "Beef Tacos",
+            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Mexican"]
+        },
+        {
+            id: 5,
+            title: "Margherita Pizza",
+            image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+            readyInMinutes: 30,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 6,
+            title: "Salmon Teriyaki",
+            image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Japanese"]
+        }
+    ];
+}
+
+// ==================== AUTH ====================
+function toggleAuthMode() {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    document.getElementById('auth-error').textContent = '';
+    
+    if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    }
+}
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    if (password !== confirmPassword) {
+        authError.textContent = 'Passwords do not match';
+        return;
+    }
+    
+    if (password.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters';
+        return;
+    }
+    
+    try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(result.user.uid).set({
+            email: result.user.email,
+            name: 'Chef',
+            level: 1,
+            xp: 0,
+            xpToNext: 500,
+            pantry: state.pantry,
+            cookbook: [],
+            totalMealsCooked: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Account created! 🎉');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showToast('Welcome back! 👋');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+    auth.signOut();
+    showToast('Signed out');
+});
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        state.user.id = user.uid;
+        state.user.email = user.email;
+        
+        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').classList.add('show');
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                state.user = { ...state.user, ...data };
+                state.pantry = data.pantry || state.pantry;
+                state.cookbook = data.cookbook || [];
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+        
+        // Load initial recipes
+        if (state.discoveredRecipes.length === 0) {
+            await searchRecipes();
+        }
+        
+        init();
+    } else {
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('app-content').classList.remove('show');
+    }
+});
+
+// ==================== APP FUNCTIONS ====================
+function init() {
+    setupNavigation();
+    render();
+    console.log('✅ KitchenQuest Ready with Recipe Search!');
+}
+
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.getAttribute('data-page');
+            state.currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            render();
+        });
+    });
+}
+
+function handleSearch() {
+    const query = document.getElementById('recipe-search-input').value;
+    state.searchQuery = query;
+    searchRecipes(query, state.selectedCuisine);
+}
+
+function selectCuisine(cuisine) {
+    state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
+    searchRecipes(state.searchQuery, state.selectedCuisine);
+}
+
+function render() {
+    const content = document.getElementById('main-content');
+    
+    if (state.currentPage === 'home') {
+        content.innerHTML = `
+            <div class="hero">
+                <h1>Welcome, ${state.user.name}! 👋</h1>
+                <p>Level ${state.user.level} Chef</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
+                        <div class="hero-stat-label">Meals Cooked</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.cookbook.length}</div>
+                        <div class="hero-stat-label">Saved Recipes</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.pantry.length}</div>
+                        <div class="hero-stat-label">Pantry Items</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🍳 Quick Start</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px;">
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                    <button class="auth-btn auth-btn-secondary" onclick="navigateTo('cookbook')">My Cookbook (${state.cookbook.length})</button>
+                </div>
+            </div>
+        `;
+    } else if (state.currentPage === 'discover') {
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="recipe-search-input" 
+                       class="search-input" 
+                       placeholder="Search recipes... (pasta, chicken, salad)"
+                       value="${state.searchQuery}"
+                       onkeypress="if(event.key==='Enter')handleSearch()">
+                <button class="search-btn" onclick="handleSearch()">Search</button>
+            </div>
+            
+            <div class="filter-chips">
+                ${cuisines.map(c => `
+                    <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
+                            onclick="selectCuisine('${c}')">
+                        ${c}
+                    </button>
+                `).join('')}
+            </div>
+            
+            ${state.isLoading ? `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching recipes...</p>
+                </div>
+            ` : state.discoveredRecipes.length === 0 ? `
+                <div class="card" style="text-align:center;padding:40px;">
+                    <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                    <h2>No recipes found</h2>
+                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                </div>
+            ` : `
+                <div class="recipe-grid">
+                    ${state.discoveredRecipes.map(r => `
+                        <div class="recipe-card">
+                            ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
+                                        style="width:100%;margin-top:12px;" 
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                    ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+    } else if (state.currentPage === 'cookbook') {
+        if (state.cookbook.length === 0) {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card" style="text-align:center;padding:60px 20px;">
+                    <div style="font-size:64px;margin-bottom:16px;">📖</div>
+                    <h2>Your cookbook is empty</h2>
+                    <p style="color:#666;margin:16px 0;">Start discovering and saving recipes!</p>
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card">
+                    <p>${state.cookbook.length} recipes saved • Synced to cloud ☁️</p>
+                </div>
+                <div class="recipe-grid">
+                    ${state.cookbook.map(r => `
+                        <div class="recipe-card">
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
+                                    🔥 Cook This (+50 XP)
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (state.currentPage === 'pantry') {
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">📦 Your Pantry</h1>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">${state.pantry.length} Ingredients</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+                    ${state.pantry.map(item => `
+                        <div style="padding:16px;background:#F5F5F5;border-radius:12px;text-align:center;">
+                            <div style="font-size:32px;margin-bottom:4px;">🥘</div>
+                            <div style="font-size:14px;font-weight:600;">${item}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function navigateTo(page) {
+    state.currentPage = page;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    render();
+}
+
+async function saveRecipe(id) {
+    const recipe = state.discoveredRecipes.find(r => r.id === id);
+    if (recipe && !state.cookbook.find(r => r.id === id)) {
+        state.cookbook.push(recipe);
+        await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+        showToast(`Saved ${recipe.title}!`);
+        render();
+    }
+}
+
+async function removeRecipe(id) {
+    state.cookbook = state.cookbook.filter(r => r.id !== id);
+    await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+    showToast('Recipe removed');
+    render();
+}
+
+async function cookRecipe(id) {
+    const recipe = state.cookbook.find(r => r.id === id);
+    if (recipe) {
+        state.user.xp += 50;
+        state.user.totalMealsCooked++;
+        
+        if (state.user.xp >= state.user.xpToNext) {
+            state.user.level++;
+            state.user.xp = 0;
+            state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
+            showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
+        } else {
+            showToast(`Cooked ${recipe.title}! +50 XP`);
+        }
+        
+        await db.collection('users').doc(state.user.id).update({
+            xp: state.user.xp,
+            level: state.user.level,
+            xpToNext: state.user.xpToNext,
+            totalMealsCooked: state.user.totalMealsCooked
+        });
+        
+        render();
+    }
+}
+
+function showToast(message) {
+    document.getElementById('toast-message').textContent = message;
+    document.getElementById('toast').classList.add('show');
+    setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+}
+
+console.log('🍳 KitchenQuest with Recipe Search Ready!');
+</script>
+
+</body>
+</html>
+}&number=12&addRecipeInformation=true`;
+        
+        if (query) url += `&query=${encodeURIComponent(query)}`;
+        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        state.discoveredRecipes = data.results.map(r => ({
+            id: r.id,
+            title: r.title,
+            image: r.image,
+            readyInMinutes: r.readyInMinutes,
+            cuisines: r.cuisines || []
+        }));
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast('Search failed. Using demo recipes.');
+        loadDemoRecipes();
+    }
+    
+    state.isLoading = false;
+    render();
+}
+
+function loadDemoRecipes() {
+    state.discoveredRecipes = [
+        {
+            id: 1,
+            title: "Pasta Carbonara",
+            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 2,
+            title: "Chicken Stir Fry",
+            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Asian"]
+        },
+        {
+            id: 3,
+            title: "Greek Salad",
+            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
+            readyInMinutes: 15,
+            cuisines: ["Greek"]
+        },
+        {
+            id: 4,
+            title: "Beef Tacos",
+            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
+            readyInMinutes: 25,
+            cuisines: ["Mexican"]
+        },
+        {
+            id: 5,
+            title: "Margherita Pizza",
+            image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+            readyInMinutes: 30,
+            cuisines: ["Italian"]
+        },
+        {
+            id: 6,
+            title: "Salmon Teriyaki",
+            image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
+            readyInMinutes: 20,
+            cuisines: ["Japanese"]
+        }
+    ];
+}
+
+// ==================== AUTH ====================
+function toggleAuthMode() {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    document.getElementById('auth-error').textContent = '';
+    
+    if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    }
+}
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    if (password !== confirmPassword) {
+        authError.textContent = 'Passwords do not match';
+        return;
+    }
+    
+    if (password.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters';
+        return;
+    }
+    
+    try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(result.user.uid).set({
+            email: result.user.email,
+            name: 'Chef',
+            level: 1,
+            xp: 0,
+            xpToNext: 500,
+            pantry: state.pantry,
+            cookbook: [],
+            totalMealsCooked: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Account created! 🎉');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showToast('Welcome back! 👋');
+    } catch (error) {
+        authError.textContent = error.message;
+    }
+});
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+    auth.signOut();
+    showToast('Signed out');
+});
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        state.user.id = user.uid;
+        state.user.email = user.email;
+        
+        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').classList.add('show');
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                state.user = { ...state.user, ...data };
+                state.pantry = data.pantry || state.pantry;
+                state.cookbook = data.cookbook || [];
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+        
+        // Load initial recipes
+        if (state.discoveredRecipes.length === 0) {
+            await searchRecipes();
+        }
+        
+        init();
+    } else {
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('app-content').classList.remove('show');
+    }
+});
+
+// ==================== APP FUNCTIONS ====================
+function init() {
+    setupNavigation();
+    render();
+    console.log('✅ KitchenQuest Ready with Recipe Search!');
+}
+
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.getAttribute('data-page');
+            state.currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            render();
+        });
+    });
+}
+
+function handleSearch() {
+    const query = document.getElementById('recipe-search-input').value;
+    state.searchQuery = query;
+    searchRecipes(query, state.selectedCuisine);
+}
+
+function selectCuisine(cuisine) {
+    state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
+    searchRecipes(state.searchQuery, state.selectedCuisine);
+}
+
+function render() {
+    const content = document.getElementById('main-content');
+    
+    if (state.currentPage === 'home') {
+        content.innerHTML = `
+            <div class="hero">
+                <h1>Welcome, ${state.user.name}! 👋</h1>
+                <p>Level ${state.user.level} Chef</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
+                        <div class="hero-stat-label">Meals Cooked</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.cookbook.length}</div>
+                        <div class="hero-stat-label">Saved Recipes</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">${state.pantry.length}</div>
+                        <div class="hero-stat-label">Pantry Items</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🍳 Quick Start</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px;">
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                    <button class="auth-btn auth-btn-secondary" onclick="navigateTo('cookbook')">My Cookbook (${state.cookbook.length})</button>
+                </div>
+            </div>
+        `;
+    } else if (state.currentPage === 'discover') {
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="recipe-search-input" 
+                       class="search-input" 
+                       placeholder="Search recipes... (pasta, chicken, salad)"
+                       value="${state.searchQuery}"
+                       onkeypress="if(event.key==='Enter')handleSearch()">
+                <button class="search-btn" onclick="handleSearch()">Search</button>
+            </div>
+            
+            <div class="filter-chips">
+                ${cuisines.map(c => `
+                    <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
+                            onclick="selectCuisine('${c}')">
+                        ${c}
+                    </button>
+                `).join('')}
+            </div>
+            
+            ${state.isLoading ? `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching recipes...</p>
+                </div>
+            ` : state.discoveredRecipes.length === 0 ? `
+                <div class="card" style="text-align:center;padding:40px;">
+                    <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                    <h2>No recipes found</h2>
+                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                </div>
+            ` : `
+                <div class="recipe-grid">
+                    ${state.discoveredRecipes.map(r => `
+                        <div class="recipe-card">
+                            ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
+                                        style="width:100%;margin-top:12px;" 
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                    ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+    } else if (state.currentPage === 'cookbook') {
+        if (state.cookbook.length === 0) {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card" style="text-align:center;padding:60px 20px;">
+                    <div style="font-size:64px;margin-bottom:16px;">📖</div>
+                    <h2>Your cookbook is empty</h2>
+                    <p style="color:#666;margin:16px 0;">Start discovering and saving recipes!</p>
+                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">Discover Recipes</button>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <h1 style="margin:24px 0;">📖 My Cookbook</h1>
+                <div class="card">
+                    <p>${state.cookbook.length} recipes saved • Synced to cloud ☁️</p>
+                </div>
+                <div class="recipe-grid">
+                    ${state.cookbook.map(r => `
+                        <div class="recipe-card">
+                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${r.title}</h3>
+                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
+                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
+                                    🔥 Cook This (+50 XP)
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (state.currentPage === 'pantry') {
+        content.innerHTML = `
+            <h1 style="margin:24px 0;">📦 Your Pantry</h1>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">${state.pantry.length} Ingredients</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+                    ${state.pantry.map(item => `
+                        <div style="padding:16px;background:#F5F5F5;border-radius:12px;text-align:center;">
+                            <div style="font-size:32px;margin-bottom:4px;">🥘</div>
+                            <div style="font-size:14px;font-weight:600;">${item}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function navigateTo(page) {
+    state.currentPage = page;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    render();
+}
+
+async function saveRecipe(id) {
+    const recipe = state.discoveredRecipes.find(r => r.id === id);
+    if (recipe && !state.cookbook.find(r => r.id === id)) {
+        state.cookbook.push(recipe);
+        await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+        showToast(`Saved ${recipe.title}!`);
+        render();
+    }
+}
+
+async function removeRecipe(id) {
+    state.cookbook = state.cookbook.filter(r => r.id !== id);
+    await db.collection('users').doc(state.user.id).update({ cookbook: state.cookbook });
+    showToast('Recipe removed');
+    render();
+}
+
+async function cookRecipe(id) {
+    const recipe = state.cookbook.find(r => r.id === id);
+    if (recipe) {
+        state.user.xp += 50;
+        state.user.totalMealsCooked++;
+        
+        if (state.user.xp >= state.user.xpToNext) {
+            state.user.level++;
+            state.user.xp = 0;
+            state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
+            showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
+        } else {
+            showToast(`Cooked ${recipe.title}! +50 XP`);
+        }
+        
+        await db.collection('users').doc(state.user.id).update({
+            xp: state.user.xp,
+            level: state.user.level,
+            xpToNext: state.user.xpToNext,
+            totalMealsCooked: state.user.totalMealsCooked
+        });
+        
+        render();
+    }
+}
+
+function showToast(message) {
+    document.getElementById('toast-message').textContent = message;
+    document.getElementById('toast').classList.add('show');
+    setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+}
+
+console.log('🍳 KitchenQuest with Recipe Search Ready!');
 </script>
 
 </body>
