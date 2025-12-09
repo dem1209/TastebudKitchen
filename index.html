@@ -240,6 +240,7 @@
         font-size: 12px;
         display: inline-block;
         margin-right: 8px;
+        margin-bottom: 4px;
     }
     
     /* Loading */
@@ -407,8 +408,10 @@
 
 <script>
 // ==================== CONFIG ====================
-// ADD YOUR SPOONACULAR API KEY HERE (Get free key at: https://spoonacular.com/food-api)
-const SPOONACULAR_API_KEY = '31518764c8b441208a59aa10481ee0ad';
+// ADD YOUR EDAMAM API CREDENTIALS HERE
+// Get free account (10,000 searches/month) at: https://developer.edamam.com/
+const EDAMAM_APP_ID = '66acb9bd';
+const EDAMAM_APP_KEY = '3c650669b1453a7139a038b3abb5f623';
 
 // Firebase Config - These keys are public by design, secured by Firebase Rules
 const firebaseConfig = {
@@ -441,13 +444,14 @@ let state = {
     discoveredRecipes: [],
     searchQuery: '',
     selectedCuisine: '',
+    selectedDiet: '',
     isLoading: false
 };
 
 // ==================== API FUNCTIONS ====================
-async function searchRecipes(query = '', cuisine = '') {
-    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
-        showToast('⚠️ Please add your Spoonacular API key');
+async function searchRecipes(query = '', cuisine = '', diet = '') {
+    if (EDAMAM_APP_ID === 'YOUR_APP_ID_HERE' || EDAMAM_APP_KEY === 'YOUR_APP_KEY_HERE') {
+        showToast('⚠️ Please add your Edamam API credentials');
         return loadDemoRecipes();
     }
     
@@ -455,21 +459,47 @@ async function searchRecipes(query = '', cuisine = '') {
     render();
     
     try {
-        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_API_KEY}&number=12&addRecipeInformation=true`;
+        let url = `https://api.edamam.com/api/recipes/v2?type=public&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`;
         
-        if (query) url += `&query=${encodeURIComponent(query)}`;
-        if (cuisine) url += `&cuisine=${encodeURIComponent(cuisine)}`;
+        // Add query parameter
+        if (query) {
+            url += `&q=${encodeURIComponent(query)}`;
+        } else {
+            url += `&q=chicken`; // Default search
+        }
+        
+        // Add cuisine filter
+        if (cuisine) {
+            url += `&cuisineType=${encodeURIComponent(cuisine)}`;
+        }
+        
+        // Add diet filter
+        if (diet) {
+            url += `&diet=${encodeURIComponent(diet)}`;
+        }
         
         const response = await fetch(url);
         const data = await response.json();
         
-        state.discoveredRecipes = data.results.map(r => ({
-            id: r.id,
-            title: r.title,
-            image: r.image,
-            readyInMinutes: r.readyInMinutes,
-            cuisines: r.cuisines || []
-        }));
+        if (data.hits && data.hits.length > 0) {
+            state.discoveredRecipes = data.hits.map(hit => {
+                const recipe = hit.recipe;
+                return {
+                    id: recipe.uri.split('#recipe_')[1] || Math.random().toString(36),
+                    title: recipe.label,
+                    image: recipe.image,
+                    readyInMinutes: recipe.totalTime || 30,
+                    cuisines: recipe.cuisineType || [],
+                    calories: Math.round(recipe.calories),
+                    servings: recipe.yield,
+                    dietLabels: recipe.dietLabels || [],
+                    healthLabels: recipe.healthLabels || []
+                };
+            });
+        } else {
+            showToast('No recipes found. Try different search terms.');
+            state.discoveredRecipes = [];
+        }
         
     } catch (error) {
         console.error('API Error:', error);
@@ -488,42 +518,54 @@ function loadDemoRecipes() {
             title: "Pasta Carbonara",
             image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
             readyInMinutes: 25,
-            cuisines: ["Italian"]
+            cuisines: ["Italian"],
+            calories: 650,
+            servings: 4
         },
         {
             id: 2,
             title: "Chicken Stir Fry",
             image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
             readyInMinutes: 20,
-            cuisines: ["Asian"]
+            cuisines: ["Asian"],
+            calories: 420,
+            servings: 2
         },
         {
             id: 3,
             title: "Greek Salad",
             image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
             readyInMinutes: 15,
-            cuisines: ["Greek"]
+            cuisines: ["Greek"],
+            calories: 280,
+            servings: 2
         },
         {
             id: 4,
             title: "Beef Tacos",
             image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
             readyInMinutes: 25,
-            cuisines: ["Mexican"]
+            cuisines: ["Mexican"],
+            calories: 550,
+            servings: 4
         },
         {
             id: 5,
             title: "Margherita Pizza",
             image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
             readyInMinutes: 30,
-            cuisines: ["Italian"]
+            cuisines: ["Italian"],
+            calories: 720,
+            servings: 2
         },
         {
             id: 6,
             title: "Salmon Teriyaki",
             image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
             readyInMinutes: 20,
-            cuisines: ["Japanese"]
+            cuisines: ["Japanese"],
+            calories: 480,
+            servings: 2
         }
     ];
 }
@@ -638,7 +680,7 @@ auth.onAuthStateChanged(async (user) => {
 function init() {
     setupNavigation();
     render();
-    console.log('✅ KitchenQuest Ready with Recipe Search!');
+    console.log('✅ KitchenQuest Ready with Edamam API!');
 }
 
 function setupNavigation() {
@@ -656,12 +698,17 @@ function setupNavigation() {
 function handleSearch() {
     const query = document.getElementById('recipe-search-input').value;
     state.searchQuery = query;
-    searchRecipes(query, state.selectedCuisine);
+    searchRecipes(query, state.selectedCuisine, state.selectedDiet);
 }
 
 function selectCuisine(cuisine) {
     state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
-    searchRecipes(state.searchQuery, state.selectedCuisine);
+    searchRecipes(state.searchQuery, state.selectedCuisine, state.selectedDiet);
+}
+
+function selectDiet(diet) {
+    state.selectedDiet = state.selectedDiet === diet ? '' : diet;
+    searchRecipes(state.searchQuery, state.selectedCuisine, state.selectedDiet);
 }
 
 function render() {
@@ -696,7 +743,8 @@ function render() {
             </div>
         `;
     } else if (state.currentPage === 'discover') {
-        const cuisines = ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Indian'];
+        const cuisines = ['Italian', 'Mexican', 'Asian', 'French', 'American', 'Indian'];
+        const diets = ['Balanced', 'High-Protein', 'Low-Carb', 'Low-Fat'];
         
         content.innerHTML = `
             <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
@@ -711,6 +759,7 @@ function render() {
                 <button class="search-btn" onclick="handleSearch()">Search</button>
             </div>
             
+            <div style="margin-bottom:12px;color:#666;font-size:14px;font-weight:600;">Cuisine:</div>
             <div class="filter-chips">
                 ${cuisines.map(c => `
                     <button class="chip ${state.selectedCuisine === c ? 'active' : ''}" 
@@ -720,16 +769,26 @@ function render() {
                 `).join('')}
             </div>
             
+            <div style="margin-bottom:12px;color:#666;font-size:14px;font-weight:600;">Diet:</div>
+            <div class="filter-chips">
+                ${diets.map(d => `
+                    <button class="chip ${state.selectedDiet === d ? 'active' : ''}" 
+                            onclick="selectDiet('${d}')">
+                        ${d}
+                    </button>
+                `).join('')}
+            </div>
+            
             ${state.isLoading ? `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Searching recipes...</p>
+                    <p>Searching 2.3M+ recipes...</p>
                 </div>
             ` : state.discoveredRecipes.length === 0 ? `
                 <div class="card" style="text-align:center;padding:40px;">
                     <div style="font-size:64px;margin-bottom:16px;">🔍</div>
                     <h2>No recipes found</h2>
-                    <p style="color:#666;margin-top:8px;">Try a different search or cuisine</p>
+                    <p style="color:#666;margin-top:8px;">Try a different search or filter</p>
                 </div>
             ` : `
                 <div class="recipe-grid">
@@ -739,11 +798,16 @@ function render() {
                             <img src="${r.image}" class="recipe-image" alt="${r.title}">
                             <div class="recipe-content">
                                 <h3 class="recipe-title">${r.title}</h3>
-                                <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
-                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                <div class="recipe-meta">
+                                    ⏱ ${r.readyInMinutes} min • 
+                                    🔥 ${r.calories} cal • 
+                                    👥 ${r.servings} servings
+                                </div>
+                                ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.slice(0, 2).map(c => `<span class="tag">${c}</span>`).join('') : ''}
+                                ${r.dietLabels && r.dietLabels.length > 0 ? r.dietLabels.slice(0, 2).map(d => `<span class="tag">${d}</span>`).join('') : ''}
                                 <button class="auth-btn ${state.cookbook.find(c => c.id === r.id) ? 'btn' : 'auth-btn-secondary'}" 
                                         style="width:100%;margin-top:12px;" 
-                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
+                                        onclick="${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(\'' + r.id + '\')' : 'saveRecipe(\'' + r.id + '\')'}">
                                     ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
                                 </button>
                             </div>
@@ -776,7 +840,7 @@ function render() {
                             <div class="recipe-content">
                                 <h3 class="recipe-title">${r.title}</h3>
                                 <div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>
-                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
+                                <button class="auth-btn auth-btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe('${r.id}')">
                                     🔥 Cook This (+50 XP)
                                 </button>
                             </div>
@@ -864,7 +928,7 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest with Recipe Search Ready!');
+console.log('🍳 KitchenQuest with Edamam API Ready!');
 </script>
 
 </body>
