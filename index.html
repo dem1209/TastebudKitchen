@@ -54,35 +54,25 @@
     }
     .auth-btn-primary { background: #FF6B35; }
     .auth-btn-secondary { background: #04E762; }
-    .auth-btn-google {
-        background: white;
-        color: #1A1A1A;
-        border: 2px solid #E0E0E0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
     .auth-error {
         color: #FF1744;
         font-size: 14px;
         text-align: center;
         margin-top: 12px;
     }
-    .auth-divider {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin: 24px 0;
-        color: #999;
+    .auth-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #666;
         font-size: 14px;
     }
-    .auth-divider::before,
-    .auth-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: #E0E0E0;
+    .auth-link button {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
     }
     
     /* App Header */
@@ -270,22 +260,26 @@
 <div id="auth-screen">
     <div class="auth-container">
         <div class="auth-logo">🍳 KitchenQuest</div>
-        <input type="email" id="email-input" class="auth-input" placeholder="Email" autocomplete="email">
-        <input type="password" id="password-input" class="auth-input" placeholder="Password" autocomplete="current-password">
-        <button id="email-signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
-        <button id="email-signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
-        <div class="auth-divider">or</div>
-        <button id="google-signin-btn" class="auth-btn auth-btn-google">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                <g fill="none">
-                    <path d="M17.6 9.2l-.1-1.8H9v3.4h4.8C13.6 12 13 13 12 13.6v2.2h3a8.8 8.8 0 0 0 2.6-6.6z" fill="#4285F4"/>
-                    <path d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.2a5.4 5.4 0 0 1-8-2.9H1V13a9 9 0 0 0 8 5z" fill="#34A853"/>
-                    <path d="M4 10.7a5.4 5.4 0 0 1 0-3.4V5H1a9 9 0 0 0 0 8l3-2.3z" fill="#FBBC05"/>
-                    <path d="M9 3.6c1.3 0 2.5.4 3.4 1.3L15 2.3A9 9 0 0 0 1 5l3 2.4a5.4 5.4 0 0 1 5-3.7z" fill="#EA4335"/>
-                </g>
-            </svg>
-            Sign in with Google
-        </button>
+        
+        <div id="signin-form">
+            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+            <div class="auth-link">
+                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+            </div>
+        </div>
+        
+        <div id="signup-form" style="display:none;">
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
+            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
+            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+            <div class="auth-link">
+                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
+            </div>
+        </div>
+        
         <p id="auth-error" class="auth-error"></p>
     </div>
 </div>
@@ -304,26 +298,7 @@
         </div>
     </header>
     
-    <main class="container" id="main-content">
-        <div class="hero">
-            <h1>Welcome, Chef! 👋</h1>
-            <p>Level 1 Chef</p>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="hero-stat-value">0</div>
-                    <div class="hero-stat-label">Meals Cooked</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">0</div>
-                    <div class="hero-stat-label">Saved Recipes</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">7</div>
-                    <div class="hero-stat-label">Pantry Items</div>
-                </div>
-            </div>
-        </div>
-    </main>
+    <main class="container" id="main-content"></main>
     
     <nav class="bottom-nav">
         <div class="nav-items">
@@ -357,7 +332,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// Firebase Config
+// Firebase Config - Note: These keys are meant to be public! They're secured by Firebase Security Rules.
 const firebaseConfig = {
     apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
     authDomain: "kitchenquest-pro.firebaseapp.com",
@@ -431,23 +406,48 @@ let state = {
     ]
 };
 
-// Elements
-const authScreen = document.getElementById('auth-screen');
-const appContent = document.getElementById('app-content');
-const emailInput = document.getElementById('email-input');
-const passwordInput = document.getElementById('password-input');
-const authError = document.getElementById('auth-error');
+// Auth Mode Toggle
+function toggleAuthMode() {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    document.getElementById('auth-error').textContent = '';
+    
+    if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+    } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    }
+}
 
-// Auth Handlers
-document.getElementById('email-signup-btn').addEventListener('click', async () => {
+// Sign Up
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
+    if (password !== confirmPassword) {
+        authError.textContent = 'Passwords do not match';
+        return;
+    }
+    
+    if (password.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters';
+        return;
+    }
+    
     try {
-        authError.textContent = '';
-        const result = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+        const result = await auth.createUserWithEmailAndPassword(email, password);
         await db.collection('users').doc(result.user.uid).set({
             email: result.user.email,
             name: 'Chef',
             level: 1,
             xp: 0,
+            xpToNext: 500,
             pantry: state.pantry,
             cookbook: [],
             totalMealsCooked: 0,
@@ -459,42 +459,23 @@ document.getElementById('email-signup-btn').addEventListener('click', async () =
     }
 });
 
-document.getElementById('email-signin-btn').addEventListener('click', async () => {
+// Sign In
+document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const authError = document.getElementById('auth-error');
+    
+    authError.textContent = '';
+    
     try {
-        authError.textContent = '';
-        await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+        await auth.signInWithEmailAndPassword(email, password);
         showToast('Welcome back! 👋');
     } catch (error) {
         authError.textContent = error.message;
     }
 });
 
-document.getElementById('google-signin-btn').addEventListener('click', async () => {
-    try {
-        authError.textContent = '';
-        const provider = new firebase.auth.GoogleAuthProvider();
-        const result = await auth.signInWithPopup(provider);
-        
-        const userDoc = await db.collection('users').doc(result.user.uid).get();
-        if (!userDoc.exists) {
-            await db.collection('users').doc(result.user.uid).set({
-                email: result.user.email,
-                name: result.user.displayName || 'Chef',
-                level: 1,
-                xp: 0,
-                pantry: state.pantry,
-                cookbook: [],
-                totalMealsCooked: 0,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-        showToast('Signed in! 🎉');
-    } catch (error) {
-        console.error('Google sign-in error:', error);
-        authError.textContent = 'Google sign-in failed. Try email/password instead.';
-    }
-});
-
+// Sign Out
 document.getElementById('signout-btn').addEventListener('click', () => {
     auth.signOut();
     showToast('Signed out');
@@ -506,12 +487,11 @@ auth.onAuthStateChanged(async (user) => {
         console.log('User signed in:', user.email);
         state.user.id = user.uid;
         state.user.email = user.email;
-        state.user.name = user.displayName || 'Chef';
         
-        document.getElementById('user-display').textContent = `👨‍🍳 ${state.user.name}`;
+        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
         
-        authScreen.style.display = 'none';
-        appContent.classList.add('show');
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').classList.add('show');
         
         // Load user data
         try {
@@ -529,8 +509,8 @@ auth.onAuthStateChanged(async (user) => {
         init();
     } else {
         console.log('No user signed in');
-        authScreen.style.display = 'block';
-        appContent.classList.remove('show');
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('app-content').classList.remove('show');
     }
 });
 
@@ -718,7 +698,7 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest Loaded!');
+console.log('🍳 KitchenQuest Loaded - Email/Password Auth Only');
 </script>
 
 </body>
