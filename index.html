@@ -3,416 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KitchenQuest Pro - Cook, Connect, Earn</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>KitchenQuest - Cook, Connect, Earn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    :root {
-        --primary: #FF6B35;
-        --primary-dark: #E85A2B;
-        --secondary: #04E762;
-        --secondary-dark: #03C653;
-        --accent: #FFD23F;
-        --danger: #FF1744;
-        --bg: #FAFAFA;
-        --bg-elevated: #FFFFFF;
-        --bg-card: #FFFFFF;
-        --bg-input: #F5F5F5;
-        --text-primary: #1A1A1A;
-        --text-secondary: #666666;
-        --text-tertiary: #999999;
-        --border: #E0E0E0;
-        --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 24px;
-    }
-    
-    body.dark {
-        --bg: #0A0A0A;
-        --bg-elevated: #1A1A1A;
-        --bg-card: #1F1F1F;
-        --bg-input: #2A2A2A;
-        --text-primary: #FFFFFF;
-        --text-secondary: #B0B0B0;
-        --text-tertiary: #808080;
-        --border: #333333;
-    }
-    
-    body {
-        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: var(--bg);
-        color: var(--text-primary);
-        min-height: 100vh;
-        padding-bottom: 100px;
-        transition: background 0.3s, color 0.3s;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-        font-family: 'Syne', sans-serif;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-    
-    /* Auth Styles */
-    .auth-container {
-        max-width: 400px;
-        margin: 80px auto;
-        padding: 40px;
-        background: var(--bg-card);
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--border);
-    }
-    
-    .auth-logo {
-        text-align: center;
-        margin-bottom: 32px;
-    }
-    
-    .auth-logo-text {
-        font-family: 'Syne', sans-serif;
-        font-size: 32px;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .auth-input {
-        width: 100%;
-        padding: 14px 16px;
-        border: 2px solid var(--border);
-        border-radius: var(--radius-md);
-        font-size: 15px;
-        background: var(--bg-input);
-        color: var(--text-primary);
-        margin-bottom: 12px;
-        font-family: 'DM Sans', sans-serif;
-        transition: all 0.2s;
-    }
-    
-    .auth-input:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
-    
-    .auth-btn {
-        width: 100%;
-        padding: 14px 20px;
-        border-radius: var(--radius-md);
-        border: none;
-        font-weight: 600;
-        font-size: 15px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: 'DM Sans', sans-serif;
-        margin-bottom: 12px;
-        color: white;
-    }
-    
-    .auth-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .auth-btn-primary {
-        background: var(--primary);
-    }
-    
-    .auth-btn-secondary {
-        background: var(--secondary);
-    }
-    
-    .auth-error {
-        color: var(--danger);
-        font-size: 14px;
-        margin-top: 12px;
-        text-align: center;
-    }
-    
-    .auth-note {
-        text-align: center;
-        color: var(--text-tertiary);
-        font-size: 12px;
-        margin-top: 16px;
-    }
-    
-    /* App Styles */
-    .app-header {
-        position: sticky;
-        top: 0;
-        background: var(--bg-elevated);
-        border-bottom: 1px solid var(--border);
-        padding: 16px 0;
-        z-index: 100;
-        backdrop-filter: blur(20px);
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .logo {
-        font-family: 'Syne', sans-serif;
-        font-size: 24px;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .btn {
-        padding: 12px 24px;
-        border-radius: var(--radius-md);
-        border: none;
-        font-weight: 600;
-        font-size: 15px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: 'DM Sans', sans-serif;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-    
-    .btn-secondary {
-        background: var(--secondary);
-        color: white;
-    }
-    
-    .btn-outline {
-        background: transparent;
-        border: 2px solid var(--border);
-        color: var(--text-primary);
-    }
-    
-    .btn-sm {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-    
-    .hero {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border-radius: var(--radius-xl);
-        padding: 40px;
-        margin: 24px 0;
-        color: white;
-    }
-    
-    .hero h1 {
-        font-size: 36px;
-        margin-bottom: 8px;
-    }
-    
-    .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 16px;
-        margin-top: 24px;
-    }
-    
-    .hero-stat {
-        background: rgba(255,255,255,0.15);
-        padding: 16px;
-        border-radius: var(--radius-md);
-    }
-    
-    .hero-stat-value {
-        font-size: 28px;
-        font-weight: 700;
-    }
-    
-    .hero-stat-label {
-        font-size: 14px;
-        margin-top: 4px;
-    }
-    
-    .card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .recipe-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 24px;
-        margin: 24px 0;
-    }
-    
-    .recipe-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    
-    .recipe-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .recipe-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        background: var(--bg-input);
-    }
-    
-    .recipe-content {
-        padding: 20px;
-    }
-    
-    .recipe-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    
-    .recipe-meta {
-        color: var(--text-secondary);
-        font-size: 14px;
-        margin-bottom: 12px;
-    }
-    
-    .tag {
-        padding: 4px 12px;
-        background: var(--bg-input);
-        border-radius: 16px;
-        font-size: 12px;
-        display: inline-block;
-        margin-right: 8px;
-    }
-    
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--bg-elevated);
-        border-top: 1px solid var(--border);
-        padding: 12px 0;
-        z-index: 100;
-    }
-    
-    .nav-items {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-    
-    .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        padding: 8px;
-        border: none;
-        background: none;
-        color: var(--text-tertiary);
-        cursor: pointer;
-        border-radius: var(--radius-sm);
-    }
-    
-    .nav-item.active {
-        color: var(--primary);
-        background: rgba(255, 107, 53, 0.1);
-    }
-    
-    .nav-icon {
-        font-size: 24px;
-    }
-    
-    .nav-label {
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .toast {
-        position: fixed;
-        top: 24px;
-        right: 24px;
-        background: var(--bg-elevated);
-        padding: 16px 24px;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-        z-index: 2000;
-        display: none;
-        border: 1px solid var(--border);
-    }
-    
-    .toast.show {
-        display: block;
-        animation: slideIn 0.3s;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(400px); }
-        to { transform: translateX(0); }
-    }
-    
-    .saved-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: var(--secondary);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-    }
-    
-    #app-content { display: none; }
-    #app-content.show { display: block; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#FF6B35;--secondary:#04E762;--bg:#FAFAFA;--card:#FFF;--text:#1A1A1A;--text-secondary:#666;--border:#E0E0E0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:100px}
+    h1,h2,h3{font-family:'Syne',sans-serif;font-weight:700}
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    .auth-container{max-width:400px;margin:80px auto;padding:40px;background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+    .auth-logo{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--primary),#FFD23F);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:32px}
+    .auth-input{width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:12px}
+    .auth-input:focus{outline:none;border-color:var(--primary)}
+    .auth-btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:600;cursor:pointer;margin-bottom:12px;color:white}
+    .auth-btn-primary{background:var(--primary)}
+    .auth-btn-secondary{background:var(--secondary)}
+    .auth-btn-google{background:white;color:var(--text);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px}
+    .auth-error{color:#FF1744;font-size:14px;text-align:center;margin-top:12px}
+    .auth-divider{display:flex;align-items:center;gap:16px;margin:24px 0;color:var(--text-secondary);font-size:14px}
+    .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .app-header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:16px 0;z-index:100}
+    .header-content{display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--primary),#FFD23F);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .btn{padding:12px 24px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
+    .btn-primary{background:var(--primary);color:white}
+    .btn-secondary{background:var(--secondary);color:white}
+    .btn-outline{background:transparent;border:2px solid var(--border);color:var(--text)}
+    .btn-sm{padding:8px 16px;font-size:14px}
+    .hero{background:linear-gradient(135deg,var(--primary),#E85A2B);border-radius:16px;padding:40px;margin:24px 0;color:white}
+    .hero h1{font-size:36px;margin-bottom:8px}
+    .hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-top:24px}
+    .hero-stat{background:rgba(255,255,255,0.15);padding:16px;border-radius:12px}
+    .hero-stat-value{font-size:28px;font-weight:700}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+    .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin:24px 0}
+    .recipe-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.3s}
+    .recipe-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+    .recipe-image{width:100%;height:200px;object-fit:cover}
+    .recipe-content{padding:20px}
+    .recipe-title{font-size:18px;font-weight:700;margin-bottom:8px}
+    .recipe-meta{color:var(--text-secondary);font-size:14px;margin-bottom:12px}
+    .tag{padding:4px 12px;background:#F5F5F5;border-radius:16px;font-size:12px;display:inline-block;margin-right:8px}
+    .saved-badge{position:absolute;top:12px;right:12px;background:var(--secondary);color:white;padding:6px 12px;border-radius:20px;font-size:12px}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:12px 0;z-index:100}
+    .nav-items{display:grid;grid-template-columns:repeat(4,1fr);max-width:1200px;margin:0 auto;padding:0 20px}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border:none;background:none;color:var(--text-secondary);cursor:pointer;border-radius:8px}
+    .nav-item.active{color:var(--primary);background:rgba(255,107,53,0.1)}
+    .toast{position:fixed;top:24px;right:24px;background:var(--card);padding:16px 24px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:2000;display:none}
+    .toast.show{display:block;animation:slideIn 0.3s}
+    @keyframes slideIn{from{transform:translateX(400px)}to{transform:translateX(0)}}
+    #app-content{display:none}
+    #app-content.show{display:block}
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-container">
-        <div class="auth-logo">
-            <div class="auth-logo-text">🍳 KitchenQuest</div>
-            <p style="color: var(--text-secondary); margin-top: 8px;">Cook, Connect, Earn</p>
-        </div>
-        
-        <input type="text" id="username-input" class="auth-input" placeholder="Choose a username">
-        
-        <button id="signin-btn" class="auth-btn auth-btn-primary">Start Cooking!</button>
-        
-        <p class="auth-note">No signup needed • Data saved locally on your device</p>
-        
+        <div class="auth-logo">🍳 KitchenQuest</div>
+        <input type="email" id="email-input" class="auth-input" placeholder="Email">
+        <input type="password" id="password-input" class="auth-input" placeholder="Password">
+        <button id="email-signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
+        <button id="email-signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
+        <div class="auth-divider">or</div>
+        <button id="google-signin-btn" class="auth-btn auth-btn-google">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><g fill="none"><path d="M17.6 9.2l-.1-1.8H9v3.4h4.8C13.6 12 13 13 12 13.6v2.2h3a8.8 8.8 0 0 0 2.6-6.6z" fill="#4285F4"/><path d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.2a5.4 5.4 0 0 1-8-2.9H1V13a9 9 0 0 0 8 5z" fill="#34A853"/><path d="M4 10.7a5.4 5.4 0 0 1 0-3.4V5H1a9 9 0 0 0 0 8l3-2.3z" fill="#FBBC05"/><path d="M9 3.6c1.3 0 2.5.4 3.4 1.3L15 2.3A9 9 0 0 0 1 5l3 2.4a5.4 5.4 0 0 1 5-3.7z" fill="#EA4335"/></g></svg>
+            Sign in with Google
+        </button>
         <p id="auth-error" class="auth-error"></p>
     </div>
 </div>
@@ -422,335 +79,49 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">KitchenQuest</div>
-                <div style="display:flex;gap:12px;align-items:center;">
-                    <span style="color: var(--text-secondary); font-size: 14px;" id="user-display"></span>
+                <div style="display:flex;gap:12px;align-items:center">
+                    <span style="color:#666;font-size:14px" id="user-display"></span>
                     <button class="btn btn-outline btn-sm" id="signout-btn">Sign Out</button>
                 </div>
             </div>
         </div>
     </header>
-
     <main class="container" id="main-content"></main>
-
     <nav class="bottom-nav">
         <div class="nav-items">
-            <button class="nav-item active" onclick="navigate('home')">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">Home</span>
-            </button>
-            <button class="nav-item" onclick="navigate('discover')">
-                <span class="nav-icon">🔍</span>
-                <span class="nav-label">Discover</span>
-            </button>
-            <button class="nav-item" onclick="navigate('cookbook')">
-                <span class="nav-icon">📖</span>
-                <span class="nav-label">Cookbook</span>
-            </button>
-            <button class="nav-item" onclick="navigate('pantry')">
-                <span class="nav-icon">📦</span>
-                <span class="nav-label">Pantry</span>
-            </button>
+            <button class="nav-item active" data-page="home"><span style="font-size:24px">🏠</span><span style="font-size:12px;font-weight:600">Home</span></button>
+            <button class="nav-item" data-page="discover"><span style="font-size:24px">🔍</span><span style="font-size:12px;font-weight:600">Discover</span></button>
+            <button class="nav-item" data-page="cookbook"><span style="font-size:24px">📖</span><span style="font-size:12px;font-weight:600">Cookbook</span></button>
+            <button class="nav-item" data-page="pantry"><span style="font-size:24px">📦</span><span style="font-size:12px;font-weight:600">Pantry</span></button>
         </div>
     </nav>
 </div>
 
-<div id="toast" class="toast">
-    <div style="font-weight:600;" id="toast-message"></div>
-</div>
+<div id="toast" class="toast"><div style="font-weight:600" id="toast-message"></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// ==================== STATE ====================
-let state = {
-    user: {
-        username: null,
-        level: 1,
-        xp: 0,
-        xpToNext: 500,
-        totalMealsCooked: 0,
-        streak: 0
-    },
-    cookbook: [],
-    pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
-    currentPage: 'home',
-    discoveredRecipes: [
-        {
-            id: 1,
-            title: "Pasta Carbonara",
-            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
-            time: 25,
-            cuisine: "Italian"
-        },
-        {
-            id: 2,
-            title: "Chicken Stir Fry",
-            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
-            time: 20,
-            cuisine: "Asian"
-        },
-        {
-            id: 3,
-            title: "Greek Salad",
-            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",
-            time: 15,
-            cuisine: "Greek"
-        },
-        {
-            id: 4,
-            title: "Beef Tacos",
-            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",
-            time: 25,
-            cuisine: "Mexican"
-        },
-        {
-            id: 5,
-            title: "Margherita Pizza",
-            image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
-            time: 30,
-            cuisine: "Italian"
-        },
-        {
-            id: 6,
-            title: "Salmon Teriyaki",
-            image: "https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",
-            time: 20,
-            cuisine: "Japanese"
-        }
-    ],
-    theme: 'light'
-};
-
-// ==================== AUTH ====================
-const usernameInput = document.getElementById('username-input');
-const signinBtn = document.getElementById('signin-btn');
-const signoutBtn = document.getElementById('signout-btn');
-const authError = document.getElementById('auth-error');
-const authScreen = document.getElementById('auth-screen');
-const appContent = document.getElementById('app-content');
-
-signinBtn.addEventListener('click', () => {
-    const username = usernameInput.value.trim();
-    if (!username) {
-        authError.textContent = 'Please enter a username';
-        return;
-    }
-    
-    state.user.username = username;
-    loadState();
-    
-    document.getElementById('user-display').textContent = `👨‍🍳 ${username}`;
-    authScreen.style.display = 'none';
-    appContent.classList.add('show');
-    
-    init();
-    showToast(`Welcome, ${username}! 🎉`);
-});
-
-signoutBtn.addEventListener('click', () => {
-    saveState();
-    state.user.username = null;
-    authScreen.style.display = 'block';
-    appContent.classList.remove('show');
-    showToast('Signed out');
-});
-
-// Check if user already logged in
-window.addEventListener('load', () => {
-    const savedUsername = localStorage.getItem('kq_username');
-    if (savedUsername) {
-        usernameInput.value = savedUsername;
-        signinBtn.click();
-    }
-});
-
-// ==================== STORAGE ====================
-function loadState() {
-    const saved = localStorage.getItem('kq_data_' + state.user.username);
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            state = { ...state, ...data };
-        } catch (e) {
-            console.error('Load failed:', e);
-        }
-    }
-}
-
-function saveState() {
-    if (state.user.username) {
-        localStorage.setItem('kq_username', state.user.username);
-        localStorage.setItem('kq_data_' + state.user.username, JSON.stringify(state));
-    }
-}
-
-// ==================== APP ====================
-function init() {
-    render();
-}
-
-function navigate(page) {
-    state.currentPage = page;
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    
-    // Find and activate the clicked nav item
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach((item, index) => {
-        const icons = ['🏠', '🔍', '📖', '📦'];
-        if (item.querySelector('.nav-icon').textContent === icons[['home', 'discover', 'cookbook', 'pantry'].indexOf(page)]) {
-            item.classList.add('active');
-        }
-    });
-    
-    render();
-}
-
-function render() {
-    const content = document.getElementById('main-content');
-    
-    if (state.currentPage === 'home') {
-        content.innerHTML = `
-            <div class="hero">
-                <h1>Welcome, ${state.user.username}! 👋</h1>
-                <p>Level ${state.user.level} Chef</p>
-                <div class="hero-stats">
-                    <div class="hero-stat">
-                        <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
-                        <div class="hero-stat-label">Meals Cooked</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-value">${state.cookbook.length}</div>
-                        <div class="hero-stat-label">Saved Recipes</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-value">${state.pantry.length}</div>
-                        <div class="hero-stat-label">Pantry Items</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-value">${state.user.streak}🔥</div>
-                        <div class="hero-stat-label">Day Streak</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h2>🍳 Quick Start</h2>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px;">
-                    <button class="btn btn-primary" onclick="navigate('discover')">Discover Recipes</button>
-                    <button class="btn btn-secondary" onclick="navigate('cookbook')">My Cookbook (${state.cookbook.length})</button>
-                </div>
-            </div>
-        `;
-    } else if (state.currentPage === 'discover') {
-        content.innerHTML = `
-            <h1 style="margin:24px 0;">🔍 Discover Recipes</h1>
-            <div class="recipe-grid">
-                ${state.discoveredRecipes.map(r => `
-                    <div class="recipe-card">
-                        ${state.cookbook.find(c => c.id === r.id) ? '<div class="saved-badge">✓ Saved</div>' : ''}
-                        <img src="${r.image}" class="recipe-image" alt="${r.title}">
-                        <div class="recipe-content">
-                            <h3 class="recipe-title">${r.title}</h3>
-                            <div class="recipe-meta">⏱ ${r.time} min</div>
-                            <span class="tag">${r.cuisine}</span>
-                            <button class="btn ${state.cookbook.find(c => c.id === r.id) ? 'btn-outline' : 'btn-secondary'}" 
-                                    style="width:100%;margin-top:12px;" 
-                                    onclick="event.stopPropagation();${state.cookbook.find(c => c.id === r.id) ? 'removeRecipe(' + r.id + ')' : 'saveRecipe(' + r.id + ')'}">
-                                ${state.cookbook.find(c => c.id === r.id) ? '✗ Remove' : '+ Save'}
-                            </button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    } else if (state.currentPage === 'cookbook') {
-        content.innerHTML = `
-            <h1 style="margin:24px 0;">📖 My Cookbook</h1>
-            ${state.cookbook.length === 0 ? `
-                <div class="card" style="text-align:center;padding:60px 20px;">
-                    <div style="font-size:64px;margin-bottom:16px;">📖</div>
-                    <h2>Your cookbook is empty</h2>
-                    <p style="color:var(--text-secondary);margin:16px 0;">Start discovering and saving recipes!</p>
-                    <button class="btn btn-primary" onclick="navigate('discover')">Discover Recipes</button>
-                </div>
-            ` : `
-                <div class="card"><p>${state.cookbook.length} recipes saved</p></div>
-                <div class="recipe-grid">
-                    ${state.cookbook.map(r => `
-                        <div class="recipe-card">
-                            <img src="${r.image}" class="recipe-image" alt="${r.title}">
-                            <div class="recipe-content">
-                                <h3 class="recipe-title">${r.title}</h3>
-                                <div class="recipe-meta">⏱ ${r.time} min</div>
-                                <span class="tag">${r.cuisine}</span>
-                                <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="cookRecipe(${r.id})">
-                                    🔥 Cook This (+50 XP)
-                                </button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `}
-        `;
-    } else {
-        content.innerHTML = `
-            <h1 style="margin:24px 0;">📦 Your Pantry</h1>
-            <div class="card">
-                <h3 style="margin-bottom:16px;">${state.pantry.length} Ingredients</h3>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
-                    ${state.pantry.map(item => `
-                        <div style="padding:16px;background:var(--bg-input);border-radius:var(--radius-md);text-align:center;">
-                            <div style="font-size:32px;margin-bottom:4px;">🥘</div>
-                            <div style="font-size:14px;font-weight:600;">${item}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-}
-
-function saveRecipe(id) {
-    const recipe = state.discoveredRecipes.find(r => r.id === id);
-    if (recipe && !state.cookbook.find(r => r.id === id)) {
-        state.cookbook.push(recipe);
-        saveState();
-        showToast(`Saved ${recipe.title}!`);
-        render();
-    }
-}
-
-function removeRecipe(id) {
-    state.cookbook = state.cookbook.filter(r => r.id !== id);
-    saveState();
-    showToast('Recipe removed');
-    render();
-}
-
-function cookRecipe(id) {
-    const recipe = state.cookbook.find(r => r.id === id);
-    if (recipe) {
-        state.user.xp += 50;
-        state.user.totalMealsCooked++;
-        
-        if (state.user.xp >= state.user.xpToNext) {
-            state.user.level++;
-            state.user.xp = 0;
-            state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
-            showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
-        } else {
-            showToast(`Cooked ${recipe.title}! +50 XP`);
-        }
-        
-        saveState();
-        render();
-    }
-}
-
-function showToast(message) {
-    document.getElementById('toast-message').textContent = message;
-    document.getElementById('toast').classList.add('show');
-    setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
-}
-
-console.log('✅ KitchenQuest Pro - Ready! (Standalone Mode)');
+const firebaseConfig={apiKey:"AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",authDomain:"kitchenquest-pro.firebaseapp.com",projectId:"kitchenquest-pro",storageBucket:"kitchenquest-pro.firebasestorage.app",messagingSenderId:"1051745419180",appId:"1:1051745419180:web:d314309e15003d89dd0409"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore();
+let state={user:{id:null,email:null,name:'Chef',level:1,xp:0,xpToNext:500,totalMealsCooked:0},cookbook:[],pantry:['salt','pepper','olive oil','eggs','milk','flour','butter'],currentPage:'home',discoveredRecipes:[]};
+const recipes=[{id:1,title:"Pasta Carbonara",image:"https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",readyInMinutes:25,cuisines:["Italian"]},{id:2,title:"Chicken Stir Fry",image:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",readyInMinutes:20,cuisines:["Asian"]},{id:3,title:"Greek Salad",image:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",readyInMinutes:15,cuisines:["Greek"]},{id:4,title:"Beef Tacos",image:"https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400",readyInMinutes:25,cuisines:["Mexican"]},{id:5,title:"Margherita Pizza",image:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",readyInMinutes:30,cuisines:["Italian"]},{id:6,title:"Salmon Teriyaki",image:"https://images.unsplash.com/photo-1580959375367-714fc37b8a3c?w=400",readyInMinutes:20,cuisines:["Japanese"]}];
+document.getElementById('email-signup-btn').addEventListener('click',async()=>{try{const result=await auth.createUserWithEmailAndPassword(document.getElementById('email-input').value,document.getElementById('password-input').value);await db.collection('users').doc(result.user.uid).set({email:result.user.email,name:'Chef',level:1,xp:0,pantry:state.pantry,cookbook:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});showToast('Account created! 🎉')}catch(error){document.getElementById('auth-error').textContent=error.message}});
+document.getElementById('email-signin-btn').addEventListener('click',async()=>{try{await auth.signInWithEmailAndPassword(document.getElementById('email-input').value,document.getElementById('password-input').value);showToast('Welcome back! 👋')}catch(error){document.getElementById('auth-error').textContent=error.message}});
+document.getElementById('google-signin-btn').addEventListener('click',async()=>{try{const provider=new firebase.auth.GoogleAuthProvider(),result=await auth.signInWithPopup(provider),userDoc=await db.collection('users').doc(result.user.uid).get();if(!userDoc.exists)await db.collection('users').doc(result.user.uid).set({email:result.user.email,name:result.user.displayName||'Chef',level:1,xp:0,pantry:state.pantry,cookbook:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});showToast('Signed in! 🎉')}catch(error){document.getElementById('auth-error').textContent=error.message}});
+document.getElementById('signout-btn').addEventListener('click',()=>{auth.signOut();showToast('Signed out')});
+auth.onAuthStateChanged(async(user)=>{if(user){state.user.id=user.uid;state.user.email=user.email;state.user.name=user.displayName||'Chef';document.getElementById('user-display').textContent=`👨‍🍳 ${state.user.name}`;document.getElementById('auth-screen').style.display='none';document.getElementById('app-content').classList.add('show');const doc=await db.collection('users').doc(user.uid).get();if(doc.exists){const data=doc.data();state.user={...state.user,...data};state.pantry=data.pantry||state.pantry;state.cookbook=data.cookbook||[]}state.discoveredRecipes=recipes;init()}else{document.getElementById('auth-screen').style.display='block';document.getElementById('app-content').classList.remove('show')}});
+function init(){setupNavigation();render();console.log('✅ KitchenQuest with Real Auth!')}
+function setupNavigation(){document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>{const page=item.getAttribute('data-page');state.currentPage=page;document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));item.classList.add('active');render()})})}
+function render(){const content=document.getElementById('main-content');if(state.currentPage==='home')content.innerHTML=`<div class="hero"><h1>Welcome, ${state.user.name}! 👋</h1><p>Level ${state.user.level} Chef</p><div class="hero-stats"><div class="hero-stat"><div class="hero-stat-value">${state.user.totalMealsCooked}</div><div class="hero-stat-label">Meals Cooked</div></div><div class="hero-stat"><div class="hero-stat-value">${state.cookbook.length}</div><div class="hero-stat-label">Saved Recipes</div></div><div class="hero-stat"><div class="hero-stat-value">${state.pantry.length}</div><div class="hero-stat-label">Pantry Items</div></div></div></div><div class="card"><h2>🍳 Quick Start</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px"><button class="btn btn-primary" onclick="document.querySelector('[data-page=discover]').click()">Discover Recipes</button><button class="btn btn-secondary" onclick="document.querySelector('[data-page=cookbook]').click()">My Cookbook (${state.cookbook.length})</button></div></div>`;else if(state.currentPage==='discover')content.innerHTML=`<h1 style="margin:24px 0">🔍 Discover Recipes</h1><div class="recipe-grid">${state.discoveredRecipes.map(r=>`<div class="recipe-card" style="position:relative">${state.cookbook.find(c=>c.id===r.id)?'<div class="saved-badge">✓ Saved</div>':''}<img src="${r.image}" class="recipe-image"><div class="recipe-content"><h3 class="recipe-title">${r.title}</h3><div class="recipe-meta">⏱ ${r.readyInMinutes} min</div>${r.cuisines?r.cuisines.map(c=>`<span class="tag">${c}</span>`).join(''):''}<button class="btn ${state.cookbook.find(c=>c.id===r.id)?'btn-outline':'btn-secondary'}" style="width:100%;margin-top:12px" onclick="event.stopPropagation();${state.cookbook.find(c=>c.id===r.id)?'removeRecipe('+r.id+')':'saveRecipe('+r.id+')'}">${state.cookbook.find(c=>c.id===r.id)?'✗ Remove':'+ Save'}</button></div></div>`).join('')}</div>`;else if(state.currentPage==='cookbook')content.innerHTML=state.cookbook.length===0?`<h1 style="margin:24px 0">📖 My Cookbook</h1><div class="card" style="text-align:center;padding:60px 20px"><div style="font-size:64px;margin-bottom:16px">📖</div><h2>Your cookbook is empty</h2><p style="color:#666;margin:16px 0">Start discovering and saving recipes!</p><button class="btn btn-primary" onclick="document.querySelector('[data-page=discover]').click()">Discover Recipes</button></div>`:`<h1 style="margin:24px 0">📖 My Cookbook</h1><div class="card"><p>${state.cookbook.length} recipes saved • Synced to cloud ☁️</p></div><div class="recipe-grid">${state.cookbook.map(r=>`<div class="recipe-card"><img src="${r.image}" class="recipe-image"><div class="recipe-content"><h3 class="recipe-title">${r.title}</h3><div class="recipe-meta">⏱ ${r.readyInMinutes} min</div><button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="cookRecipe(${r.id})">🔥 Cook This (+50 XP)</button></div></div>`).join('')}</div>`;else content.innerHTML=`<h1 style="margin:24px 0">📦 Your Pantry</h1><div class="card"><h3 style="margin-bottom:16px">${state.pantry.length} Ingredients</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px">${state.pantry.map(item=>`<div style="padding:16px;background:#F5F5F5;border-radius:12px;text-align:center"><div style="font-size:32px;margin-bottom:4px">🥘</div><div style="font-size:14px;font-weight:600">${item}</div></div>`).join('')}</div></div>`}
+async function saveRecipe(id){const recipe=state.discoveredRecipes.find(r=>r.id===id);if(recipe&&!state.cookbook.find(r=>r.id===id)){state.cookbook.push(recipe);await db.collection('users').doc(state.user.id).update({cookbook:state.cookbook});showToast(`Saved ${recipe.title}!`);render()}}
+async function removeRecipe(id){state.cookbook=state.cookbook.filter(r=>r.id!==id);await db.collection('users').doc(state.user.id).update({cookbook:state.cookbook});showToast('Recipe removed');render()}
+async function cookRecipe(id){const recipe=state.cookbook.find(r=>r.id===id);if(recipe){state.user.xp+=50;state.user.totalMealsCooked++;if(state.user.xp>=state.user.xpToNext){state.user.level++;state.user.xp=0;state.user.xpToNext=Math.floor(state.user.xpToNext*1.5);showToast(`Level Up! Now Level ${state.user.level}! 🎉`)}else showToast(`Cooked ${recipe.title}! +50 XP`);await db.collection('users').doc(state.user.id).update({xp:state.user.xp,level:state.user.level,xpToNext:state.user.xpToNext,totalMealsCooked:state.user.totalMealsCooked});render()}}
+function showToast(message){document.getElementById('toast-message').textContent=message;document.getElementById('toast').classList.add('show');setTimeout(()=>document.getElementById('toast').classList.remove('show'),3000)}
+console.log('🍳 KitchenQuest Production Ready!');
 </script>
 
 </body>
