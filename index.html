@@ -1,3 +1,4 @@
+[EXTERNAL EMAIL]
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -478,6 +479,19 @@
         margin-bottom: 10px;
         font-weight: 500;
     }
+    .cookbook-list-item {
+        padding: 20px;
+        background: var(--bg);
+        border-radius: 16px;
+        cursor: pointer;
+        border: 2px solid var(--border);
+        transition: all 0.2s;
+        margin-bottom: 12px;
+    }
+    .cookbook-list-item:hover {
+        border-color: var(--primary);
+        transform: translateX(4px);
+    }
     
     /* Loading */
     .loading {
@@ -670,16 +684,16 @@
 </div>
 
 <!-- Recipe Modal -->
-<div id="recipe-modal" class="modal" onclick="if(event.target.id==='recipe-modal')closeRecipeModal()">
-    <div class="modal-content">
+<div id="recipe-modal" class="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeRecipeModal()">×</button>
         <div id="modal-body"></div>
     </div>
 </div>
 
 <!-- Cookbook Modal -->
-<div id="cookbook-modal" class="modal" onclick="if(event.target.id==='cookbook-modal')closeCookbookModal()">
-    <div class="modal-content">
+<div id="cookbook-modal" class="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeCookbookModal()">×</button>
         <div id="cookbook-modal-body"></div>
     </div>
@@ -689,8 +703,9 @@
     <div id="toast-message"></div>
 </div>
 
-<!-- Hidden file input -->
+<!-- Hidden file inputs -->
 <input type="file" id="photo-input" accept="image/*" style="display:none;">
+<input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -735,10 +750,11 @@ let state = {
     activeCookbook: null,
     searchQuery: '',
     selectedCuisine: '',
-    selectedSource: 'all', // 'all', 'spoonacular', 'community'
+    selectedSource: 'all',
     isLoading: false,
     currentPhoto: null,
-    aiExtractedRecipe: null
+    aiExtractedRecipe: null,
+    pendingRecipeForCookbook: null
 };
 
 // ==================== AI PHOTO IMPORT ====================
@@ -746,40 +762,59 @@ function triggerPhotoUpload() {
     document.getElementById('photo-input').click();
 }
 
-document.getElementById('photo-input').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
+function triggerCamera() {
+    document.getElementById('camera-input').click();
+}
+
+async function handlePhotoUpload(file) {
     if (!file) return;
     
+    console.log('Processing photo...', file.name);
     state.isLoading = true;
     render();
     
     try {
         const base64 = await fileToBase64(file);
+        console.log('Base64 conversion complete');
         state.currentPhoto = base64;
         
         const recipe = await extractRecipeFromPhoto(base64);
+        console.log('Recipe extracted:', recipe);
         state.aiExtractedRecipe = recipe;
         
         showToast('Recipe extracted! ✨');
     } catch (error) {
         console.error('Error extracting recipe:', error);
-        showToast('Failed to extract recipe. Try again.');
+        showToast('Failed to extract recipe: ' + error.message);
     }
     
     state.isLoading = false;
     render();
+}
+
+document.getElementById('photo-input').addEventListener('change', (event) => {
+    handlePhotoUpload(event.target.files[0]);
+});
+
+document.getElementById('camera-input').addEventListener('change', (event) => {
+    handlePhotoUpload(event.target.files[0]);
 });
 
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onload = () => {
+            const result = reader.result;
+            const base64 = result.includes(',') ? result.split(',')[1] : result;
+            resolve(base64);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
 
 async function extractRecipeFromPhoto(base64Image) {
+    console.log('Calling Claude API...');
     try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -819,11 +854,16 @@ If this is not a recipe image, return: {"error": "Not a recipe"}`
             })
         });
         
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('API response:', data);
         const text = data.content[0].text;
         
         const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('No JSON found');
+        if (!jsonMatch) throw new Error('No JSON found in response');
         
         const recipe = JSON.parse(jsonMatch[0]);
         
@@ -845,13 +885,16 @@ function resetPhotoImport() {
     state.currentPhoto = null;
     state.aiExtractedRecipe = null;
     document.getElementById('photo-input').value = '';
+    document.getElementById('camera-input').value = '';
     render();
 }
 
 async function saveAIRecipe() {
     if (!state.aiExtractedRecipe) return;
     
-    const isPublic = !state.user.isPremium || confirm('Make this recipe public for others to discover?');
+    const isPublicCheckbox = document.getElementById('ai-recipe-public');
+    const isPublic = !state.user.isPremium || (isPublicCheckbox && isPublicCheckbox.checked);
+    
     await createUserRecipe(state.aiExtractedRecipe, isPublic);
     resetPhotoImport();
     render();
@@ -925,7 +968,6 @@ async function searchCommunityRecipes(query = '') {
             source: 'community'
         }));
         
-        // Client-side filter if query provided
         if (query) {
             const lowerQuery = query.toLowerCase();
             state.communityRecipes = state.communityRecipes.filter(r => 
@@ -944,13 +986,11 @@ async function loadAllRecipes(query = '', cuisine = '') {
     state.isLoading = true;
     render();
     
-    // Load both Spoonacular and community recipes
     await Promise.all([
         searchRecipes(query, cuisine),
         searchCommunityRecipes(query)
     ]);
     
-    // Combine results based on selected source
     if (state.selectedSource === 'all') {
         state.discoveredRecipes = [...state.discoveredRecipes, ...state.communityRecipes];
     } else if (state.selectedSource === 'community') {
@@ -965,23 +1005,30 @@ async function loadAllRecipes(query = '', cuisine = '') {
 async function createCookbook(name, description = '') {
     if (!name || !name.trim()) {
         showToast('Please enter a cookbook name');
-        return;
+        return false;
     }
     
-    const cookbook = {
-        name: name.trim(),
-        description: description.trim(),
-        userId: state.user.id,
-        recipes: [],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        isPublic: false
-    };
-    
-    const docRef = await db.collection('cookbooks').add(cookbook);
-    cookbook.id = docRef.id;
-    state.cookbooks.push(cookbook);
-    showToast(`Created cookbook: ${name} 📚`);
-    render();
+    try {
+        const cookbook = {
+            name: name.trim(),
+            description: description.trim(),
+            userId: state.user.id,
+            recipes: [],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isPublic: false
+        };
+        
+        const docRef = await db.collection('cookbooks').add(cookbook);
+        cookbook.id = docRef.id;
+        state.cookbooks.push(cookbook);
+        showToast(`Created cookbook: ${name} 📚`);
+        render();
+        return true;
+    } catch (error) {
+        console.error('Error creating cookbook:', error);
+        showToast('Failed to create cookbook: ' + error.message);
+        return false;
+    }
 }
 
 async function loadUserCookbooks() {
@@ -996,20 +1043,34 @@ async function loadUserCookbooks() {
     }));
 }
 
-async function addRecipeToCookbook(recipe, cookbookId) {
-    const cookbook = state.cookbooks.find(c => c.id === cookbookId);
-    if (!cookbook) return;
-    
-    if (!cookbook.recipes.find(r => r.id === recipe.id)) {
-        cookbook.recipes.push(recipe);
+async function addRecipeToCookbook(recipeData, cookbookId) {
+    try {
+        console.log('Adding recipe to cookbook:', recipeData.title, cookbookId);
+        
+        const cookbook = state.cookbooks.find(c => c.id === cookbookId);
+        if (!cookbook) {
+            showToast('Cookbook not found');
+            return;
+        }
+        
+        if (cookbook.recipes.find(r => r.id === recipeData.id)) {
+            showToast('Already in this cookbook');
+            return;
+        }
+        
+        cookbook.recipes.push(recipeData);
+        
         await db.collection('cookbooks').doc(cookbookId).update({
             recipes: cookbook.recipes
         });
+        
         showToast(`Added to ${cookbook.name}! 📖`);
         closeCookbookModal();
+        closeRecipeModal();
         render();
-    } else {
-        showToast('Already in this cookbook');
+    } catch (error) {
+        console.error('Error adding recipe to cookbook:', error);
+        showToast('Failed to add recipe: ' + error.message);
     }
 }
 
@@ -1029,12 +1090,10 @@ async function createUserRecipe(recipeData, isPublic = true) {
         source: 'user'
     };
     
-    // Save to user's personal recipes
     const userRecipeRef = await db.collection('userRecipes').add(recipe);
     recipe.id = userRecipeRef.id;
     state.userRecipes.push(recipe);
     
-    // If public, also save to public recipes collection
     if (isPublic) {
         await db.collection('publicRecipes').doc(userRecipeRef.id).set(recipe);
         showToast('Recipe published to community! 🎉');
@@ -1073,6 +1132,8 @@ function openRecipeModal(recipeId, source = 'discovered') {
         console.error('Recipe not found:', recipeId, source);
         return;
     }
+    
+    state.pendingRecipeForCookbook = recipe;
     
     const modal = document.getElementById('modal-body');
     const isSaved = state.cookbooks.some(cb => cb.recipes.find(r => r.id === recipe.id));
@@ -1125,11 +1186,11 @@ function openRecipeModal(recipeId, source = 'discovered') {
             ` : ''}
             
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px;">
-                <button class="auth-btn auth-btn-secondary" onclick='openAddToCookbookModal(${JSON.stringify(recipe)})'>
+                <button class="auth-btn auth-btn-secondary" onclick="openAddToCookbookModal()">
                     + Add to Cookbook
                 </button>
                 ${isSaved ? `
-                    <button class="auth-btn auth-btn-primary" onclick="cookRecipe('${recipe.id}'); closeRecipeModal()">
+                    <button class="auth-btn auth-btn-primary" onclick="cookRecipe('${recipe.id}')">
                         🔥 Cook This (+50 XP)
                     </button>
                 ` : ''}
@@ -1144,9 +1205,16 @@ function openRecipeModal(recipeId, source = 'discovered') {
 function closeRecipeModal() {
     document.getElementById('recipe-modal').classList.remove('show');
     document.body.style.overflow = 'auto';
+    state.pendingRecipeForCookbook = null;
 }
 
-function openAddToCookbookModal(recipe) {
+function openAddToCookbookModal() {
+    const recipe = state.pendingRecipeForCookbook;
+    if (!recipe) {
+        showToast('No recipe selected');
+        return;
+    }
+    
     const modal = document.getElementById('cookbook-modal-body');
     modal.innerHTML = `
         <div style="padding:40px;">
@@ -1155,15 +1223,12 @@ function openAddToCookbookModal(recipe) {
             
             ${state.cookbooks.length === 0 ? `
                 <div style="padding:40px;text-align:center;background:var(--bg);border-radius:16px;margin-bottom:24px;">
-                    <p style="color:var(--text-secondary);">No cookbooks yet. Create one first!</p>
+                    <p style="color:var(--text-secondary);margin-bottom:16px;">No cookbooks yet. Create one first!</p>
                 </div>
             ` : `
-                <div style="display:grid;gap:16px;margin-bottom:32px;">
+                <div style="margin-bottom:32px;">
                     ${state.cookbooks.map(cb => `
-                        <div style="padding:20px;background:var(--bg);border-radius:16px;cursor:pointer;border:2px solid var(--border);transition:all 0.2s;"
-                             onclick='addRecipeToCookbook(${JSON.stringify(recipe)}, "${cb.id}")'
-                             onmouseover="this.style.borderColor='var(--primary)'"
-                             onmouseout="this.style.borderColor='var(--border)'">
+                        <div class="cookbook-list-item" onclick="window.addRecipeToCookbookFromModal('${cb.id}')">
                             <div style="font-weight:700;font-size:16px;margin-bottom:4px;">${cb.name}</div>
                             <div style="color:var(--text-secondary);font-size:14px;">${cb.recipes.length} recipes</div>
                         </div>
@@ -1171,7 +1236,7 @@ function openAddToCookbookModal(recipe) {
                 </div>
             `}
             
-            <button class="auth-btn auth-btn-secondary" onclick="promptCreateCookbook()">
+            <button class="auth-btn auth-btn-secondary" onclick="promptCreateCookbookFromModal()">
                 + Create New Cookbook
             </button>
         </div>
@@ -1179,17 +1244,43 @@ function openAddToCookbookModal(recipe) {
     document.getElementById('cookbook-modal').classList.add('show');
 }
 
+window.addRecipeToCookbookFromModal = function(cookbookId) {
+    const recipe = state.pendingRecipeForCookbook;
+    if (recipe) {
+        addRecipeToCookbook(recipe, cookbookId);
+    }
+};
+
 function closeCookbookModal() {
     document.getElementById('cookbook-modal').classList.remove('show');
 }
 
-function promptCreateCookbook() {
+async function promptCreateCookbook() {
     const name = prompt('Cookbook name:');
     if (name && name.trim()) {
-        createCookbook(name.trim());
-        closeCookbookModal();
+        await createCookbook(name.trim());
     }
 }
+
+async function promptCreateCookbookFromModal() {
+    const name = prompt('Cookbook name:');
+    if (name && name.trim()) {
+        const success = await createCookbook(name.trim());
+        if (success) {
+            closeCookbookModal();
+            openAddToCookbookModal();
+        }
+    }
+}
+
+// Close modals on background click
+document.getElementById('recipe-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeRecipeModal();
+});
+
+document.getElementById('cookbook-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCookbookModal();
+});
 
 // ==================== AUTH ====================
 function toggleAuthMode() {
@@ -1371,6 +1462,7 @@ async function cookRecipe(recipeId) {
         totalMealsCooked: state.user.totalMealsCooked
     });
     
+    closeRecipeModal();
     render();
 }
 
@@ -1575,7 +1667,7 @@ function render() {
                         </div>
                     ` : `
                         <label class="checkbox-label">
-                            <input type="checkbox" id="recipe-public" checked>
+                            <input type="checkbox" id="ai-recipe-public" checked>
                             <span>Make this recipe public for others to discover</span>
                         </label>
                     `}
@@ -1587,12 +1679,15 @@ function render() {
             ` : `
                 <div class="card">
                     <h2 style="font-size:24px;margin-bottom:24px;">📸 Import Recipe from Photo</h2>
-                    <p style="color:var(--text-secondary);margin-bottom:24px;">Take a photo of a recipe card, cookbook page, or handwritten recipe. Our AI will extract it for you!</p>
+                    <p style="color:var(--text-secondary);margin-bottom:24px;">Take a photo or upload an image of a recipe. Our AI will extract it for you!</p>
                     
-                    <div class="photo-upload-zone" onclick="triggerPhotoUpload()">
-                        <div style="font-size:64px;margin-bottom:16px;">📸</div>
-                        <h3 style="font-size:20px;margin-bottom:12px;">Upload Recipe Photo</h3>
-                        <p style="color:var(--text-secondary);">Click to browse or drag & drop</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                        <button class="auth-btn auth-btn-primary" onclick="triggerCamera()">
+                            📷 Take Photo
+                        </button>
+                        <button class="auth-btn auth-btn-secondary" onclick="triggerPhotoUpload()">
+                            🖼️ Upload Photo
+                        </button>
                     </div>
                 </div>
                 
@@ -1708,7 +1803,6 @@ async function submitManualRecipe() {
     
     await createUserRecipe(recipe, isPublic);
     
-    // Clear form
     document.getElementById('recipe-title').value = '';
     document.getElementById('recipe-image').value = '';
     document.getElementById('recipe-time').value = '';
@@ -1725,8 +1819,9 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest with Community Recipes Ready!');
+console.log('🍳 KitchenQuest Ready with Camera Support!');
 </script>
 
 </body>
 </html>
+
