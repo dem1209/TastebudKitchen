@@ -1,4 +1,4 @@
-[EXTERNAL EMAIL]
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -769,23 +769,24 @@ function triggerCamera() {
 async function handlePhotoUpload(file) {
     if (!file) return;
     
-    console.log('Processing photo...', file.name);
+    console.log('📸 Processing photo:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
     state.isLoading = true;
     render();
     
     try {
         const base64 = await fileToBase64(file);
-        console.log('Base64 conversion complete');
+        console.log('✅ Base64 conversion complete, length:', base64.length);
         state.currentPhoto = base64;
         
+        showToast('🤖 Analyzing recipe with AI...');
         const recipe = await extractRecipeFromPhoto(base64);
-        console.log('Recipe extracted:', recipe);
+        console.log('✅ Recipe extracted:', recipe);
         state.aiExtractedRecipe = recipe;
         
-        showToast('Recipe extracted! ✨');
+        showToast('✨ Recipe extracted successfully!');
     } catch (error) {
-        console.error('Error extracting recipe:', error);
-        showToast('Failed to extract recipe: ' + error.message);
+        console.error('❌ Error extracting recipe:', error);
+        showToast('Failed: ' + error.message);
     }
     
     state.isLoading = false;
@@ -814,7 +815,8 @@ function fileToBase64(file) {
 }
 
 async function extractRecipeFromPhoto(base64Image) {
-    console.log('Calling Claude API...');
+    console.log('🤖 Calling Claude Vision API...');
+    
     try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -838,37 +840,54 @@ async function extractRecipeFromPhoto(base64Image) {
                         },
                         {
                             type: "text",
-                            text: `Extract the recipe from this image. Return ONLY a JSON object with this exact structure (no markdown, no explanation):
+                            text: `Extract the recipe from this image and return ONLY valid JSON (no markdown, no explanation):
+
 {
   "title": "Recipe name",
   "readyInMinutes": 30,
   "servings": 4,
   "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": "Step-by-step instructions"
+  "instructions": "Step-by-step instructions as plain text"
 }
 
-If this is not a recipe image, return: {"error": "Not a recipe"}`
+If not a recipe image, return: {"error": "Not a recipe"}`
                         }
                     ]
                 }]
             })
         });
         
+        console.log('📡 API Response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            throw new Error(`API error ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
-        console.log('API response:', data);
+        console.log('📦 API Response data:', data);
+        
+        if (!data.content || !data.content[0]) {
+            throw new Error('Invalid API response structure');
+        }
+        
         const text = data.content[0].text;
+        console.log('📝 Extracted text:', text);
         
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('No JSON found in response');
+        // Remove markdown code blocks if present
+        const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        console.log('🧹 Cleaned text:', cleanedText);
         
-        const recipe = JSON.parse(jsonMatch[0]);
+        const recipe = JSON.parse(cleanedText);
         
         if (recipe.error) {
             throw new Error(recipe.error);
+        }
+        
+        // Validate required fields
+        if (!recipe.title || !recipe.ingredients || !recipe.instructions) {
+            throw new Error('Missing required recipe fields');
         }
         
         return {
@@ -876,7 +895,7 @@ If this is not a recipe image, return: {"error": "Not a recipe"}`
             image: `data:image/jpeg;base64,${base64Image}`
         };
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('💥 Extraction failed:', error);
         throw error;
     }
 }
@@ -1003,14 +1022,18 @@ async function loadAllRecipes(query = '', cuisine = '') {
 
 // ==================== FIRESTORE OPERATIONS ====================
 async function createCookbook(name, description = '') {
-    if (!name || !name.trim()) {
-        showToast('Please enter a cookbook name');
+    name = name ? name.trim() : '';
+    
+    if (!name) {
+        showToast('⚠️ Please enter a cookbook name');
         return false;
     }
     
+    console.log('📚 Creating cookbook:', name);
+    
     try {
         const cookbook = {
-            name: name.trim(),
+            name: name,
             description: description.trim(),
             userId: state.user.id,
             recipes: [],
@@ -1019,37 +1042,48 @@ async function createCookbook(name, description = '') {
         };
         
         const docRef = await db.collection('cookbooks').add(cookbook);
+        console.log('✅ Cookbook created with ID:', docRef.id);
+        
         cookbook.id = docRef.id;
         state.cookbooks.push(cookbook);
-        showToast(`Created cookbook: ${name} 📚`);
+        
+        showToast(`✅ Created: ${name}`);
         render();
         return true;
     } catch (error) {
-        console.error('Error creating cookbook:', error);
-        showToast('Failed to create cookbook: ' + error.message);
+        console.error('❌ Error creating cookbook:', error);
+        showToast('Failed: ' + error.message);
         return false;
     }
 }
 
 async function loadUserCookbooks() {
-    const snapshot = await db.collection('cookbooks')
-        .where('userId', '==', state.user.id)
-        .orderBy('createdAt', 'desc')
-        .get();
+    console.log('📚 Loading cookbooks for user:', state.user.id);
     
-    state.cookbooks = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+    try {
+        const snapshot = await db.collection('cookbooks')
+            .where('userId', '==', state.user.id)
+            .orderBy('createdAt', 'asc')
+            .get();
+        
+        state.cookbooks = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log('✅ Loaded', state.cookbooks.length, 'cookbooks');
+    } catch (error) {
+        console.error('❌ Error loading cookbooks:', error);
+    }
 }
 
 async function addRecipeToCookbook(recipeData, cookbookId) {
     try {
-        console.log('Adding recipe to cookbook:', recipeData.title, cookbookId);
+        console.log('➕ Adding recipe to cookbook:', recipeData.title, '→', cookbookId);
         
         const cookbook = state.cookbooks.find(c => c.id === cookbookId);
         if (!cookbook) {
-            showToast('Cookbook not found');
+            showToast('❌ Cookbook not found');
             return;
         }
         
@@ -1064,13 +1098,14 @@ async function addRecipeToCookbook(recipeData, cookbookId) {
             recipes: cookbook.recipes
         });
         
-        showToast(`Added to ${cookbook.name}! 📖`);
+        console.log('✅ Recipe added successfully');
+        showToast(`✅ Added to ${cookbook.name}!`);
         closeCookbookModal();
         closeRecipeModal();
         render();
     } catch (error) {
-        console.error('Error adding recipe to cookbook:', error);
-        showToast('Failed to add recipe: ' + error.message);
+        console.error('❌ Error adding recipe:', error);
+        showToast('Failed: ' + error.message);
     }
 }
 
@@ -1096,9 +1131,9 @@ async function createUserRecipe(recipeData, isPublic = true) {
     
     if (isPublic) {
         await db.collection('publicRecipes').doc(userRecipeRef.id).set(recipe);
-        showToast('Recipe published to community! 🎉');
+        showToast('🎉 Published to community!');
     } else {
-        showToast('Recipe saved privately! 🔒');
+        showToast('🔒 Saved privately!');
     }
     
     return recipe;
@@ -1255,25 +1290,24 @@ function closeCookbookModal() {
     document.getElementById('cookbook-modal').classList.remove('show');
 }
 
-async function promptCreateCookbook() {
+function promptCreateCookbook() {
     const name = prompt('Cookbook name:');
-    if (name && name.trim()) {
-        await createCookbook(name.trim());
+    if (name) {
+        createCookbook(name);
     }
 }
 
 async function promptCreateCookbookFromModal() {
     const name = prompt('Cookbook name:');
-    if (name && name.trim()) {
-        const success = await createCookbook(name.trim());
+    if (name) {
+        const success = await createCookbook(name);
         if (success) {
             closeCookbookModal();
-            openAddToCookbookModal();
+            setTimeout(() => openAddToCookbookModal(), 300);
         }
     }
 }
 
-// Close modals on background click
 document.getElementById('recipe-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRecipeModal();
 });
@@ -1321,6 +1355,7 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
     
     try {
         const result = await auth.createUserWithEmailAndPassword(email, password);
+        
         await db.collection('users').doc(result.user.uid).set({
             email: result.user.email,
             name: 'Chef',
@@ -1333,9 +1368,7 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        await createCookbook('My Favorites', 'My favorite recipes');
-        
-        showToast('Account created! 🎉');
+        showToast('🎉 Account created!');
     } catch (error) {
         authError.textContent = error.message;
         signupBtn.disabled = false;
@@ -1355,7 +1388,7 @@ document.getElementById('signin-btn').addEventListener('click', async () => {
     
     try {
         await auth.signInWithEmailAndPassword(email, password);
-        showToast('Welcome back! 👋');
+        showToast('👋 Welcome back!');
     } catch (error) {
         authError.textContent = error.message;
         signinBtn.disabled = false;
@@ -1370,6 +1403,7 @@ document.getElementById('signout-btn').addEventListener('click', () => {
 
 auth.onAuthStateChanged(async (user) => {
     if (user) {
+        console.log('👤 User authenticated:', user.email);
         state.user.id = user.uid;
         state.user.email = user.email;
         
@@ -1389,8 +1423,10 @@ auth.onAuthStateChanged(async (user) => {
             await loadUserCookbooks();
             await loadUserRecipes();
             
+            // Create default "Saved" cookbook if no cookbooks exist
             if (state.cookbooks.length === 0) {
-                await createCookbook('My Favorites', 'My favorite recipes');
+                console.log('📚 Creating default "Saved" cookbook');
+                await createCookbook('Saved', 'My saved recipes');
             }
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -1402,6 +1438,7 @@ auth.onAuthStateChanged(async (user) => {
         
         init();
     } else {
+        console.log('🚪 User signed out');
         document.getElementById('auth-screen').style.display = 'block';
         document.getElementById('app-content').classList.remove('show');
     }
@@ -1412,6 +1449,8 @@ function init() {
     setupNavigation();
     render();
     console.log('✅ KitchenQuest Ready!');
+    console.log('📚 Cookbooks:', state.cookbooks.length);
+    console.log('📖 User Recipes:', state.userRecipes.length);
 }
 
 function setupNavigation() {
@@ -1450,9 +1489,9 @@ async function cookRecipe(recipeId) {
         state.user.level++;
         state.user.xp = 0;
         state.user.xpToNext = Math.floor(state.user.xpToNext * 1.5);
-        showToast(`Level Up! Now Level ${state.user.level}! 🎉`);
+        showToast(`🎉 Level Up! Now Level ${state.user.level}!`);
     } else {
-        showToast(`Cooked! +50 XP`);
+        showToast(`+50 XP`);
     }
     
     await db.collection('users').doc(state.user.id).update({
@@ -1637,7 +1676,7 @@ function render() {
             ${state.isLoading ? `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p style="font-weight:600;font-size:16px;">Extracting recipe with AI...</p>
+                    <p style="font-weight:600;font-size:16px;">🤖 Extracting recipe with AI...</p>
                 </div>
             ` : state.aiExtractedRecipe ? `
                 <div class="card">
@@ -1783,7 +1822,7 @@ async function submitManualRecipe() {
     const instructions = document.getElementById('recipe-instructions').value;
     
     if (!title || !readyInMinutes || !servings || !ingredientsText || !instructions) {
-        showToast('Please fill in all required fields');
+        showToast('⚠️ Please fill in all required fields');
         return;
     }
     
@@ -1819,7 +1858,10 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest Ready with Camera Support!');
+console.log('🍳 KitchenQuest Ready!');
+console.log('📸 Camera support enabled');
+console.log('🤖 AI recipe extraction enabled');
+console.log('📚 Default "Saved" cookbook will be created');
 </script>
 
 </body>
