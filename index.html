@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KitchenQuest</title>
+    <title>KitchenQuest - Your Recipe Companion</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,84 +40,6 @@
     }
     
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    
-    /* Auth */
-    .auth-container {
-        max-width: 440px;
-        margin: 80px auto;
-        padding: 48px;
-        background: var(--bg-elevated);
-        border-radius: 24px;
-        box-shadow: var(--shadow-lg);
-    }
-    .auth-logo {
-        font-family: 'Playfair Display', serif;
-        font-size: 36px;
-        font-weight: 900;
-        color: var(--primary);
-        text-align: center;
-        margin-bottom: 40px;
-        letter-spacing: -0.02em;
-    }
-    .auth-input {
-        width: 100%;
-        padding: 16px;
-        border: 2px solid var(--border);
-        border-radius: 12px;
-        font-size: 15px;
-        margin-bottom: 16px;
-        font-family: 'Work Sans', sans-serif;
-        transition: border 0.2s;
-    }
-    .auth-input:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
-    .auth-btn {
-        width: 100%;
-        padding: 16px;
-        border-radius: 12px;
-        border: none;
-        font-weight: 700;
-        cursor: pointer;
-        margin-bottom: 12px;
-        color: white;
-        font-size: 16px;
-        font-family: 'Work Sans', sans-serif;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .auth-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
-    }
-    .auth-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-    .auth-btn-primary { background: var(--primary); }
-    .auth-btn-secondary { background: var(--success); }
-    .auth-error {
-        color: var(--primary);
-        font-size: 14px;
-        text-align: center;
-        margin-top: 12px;
-        font-weight: 500;
-    }
-    .auth-link {
-        text-align: center;
-        margin-top: 20px;
-        color: var(--text-secondary);
-        font-size: 14px;
-    }
-    .auth-link button {
-        background: none;
-        border: none;
-        color: var(--primary);
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: underline;
-    }
     
     /* Header */
     .app-header {
@@ -164,6 +85,11 @@
     }
     .btn-primary:hover {
         background: var(--primary-dark);
+    }
+    .btn-secondary {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
     }
     
     /* Hero */
@@ -214,6 +140,27 @@
         padding: 32px;
         margin-bottom: 24px;
         box-shadow: var(--shadow);
+    }
+    
+    /* Input */
+    .input {
+        width: 100%;
+        padding: 16px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-size: 15px;
+        margin-bottom: 16px;
+        font-family: 'Work Sans', sans-serif;
+        transition: border 0.2s;
+    }
+    .input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+    textarea.input {
+        min-height: 150px;
+        resize: vertical;
+        font-family: inherit;
     }
     
     /* Search */
@@ -556,26 +503,6 @@
         to { transform: translateX(0); }
     }
     
-    /* Checkbox */
-    .checkbox-label {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px;
-        background: var(--bg);
-        border-radius: 12px;
-        cursor: pointer;
-        margin: 16px 0;
-    }
-    .checkbox-label input {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-    
-    #app-content { display: none; }
-    #app-content.show { display: block; }
-    
     @media (max-width: 768px) {
         .hero { padding: 32px 24px; }
         .hero h1 { font-size: 32px; }
@@ -584,81 +511,49 @@
         .modal-body { padding: 24px; }
         .modal-content { margin: 20px auto; }
         .nav-items { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-        .cookbook-tabs { gap: 8px; }
     }
     </style>
 </head>
 <body>
 
-<!-- Auth Screen -->
-<div id="auth-screen">
-    <div class="auth-container">
-        <div class="auth-logo">🍳 KitchenQuest</div>
-        
-        <div id="signin-form">
-            <input type="email" id="signin-email" class="auth-input" placeholder="Email" autocomplete="email">
-            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password">
-            <button id="signin-btn" class="auth-btn auth-btn-primary">Sign In</button>
-            <div class="auth-link">
-                Don't have an account? <button onclick="toggleAuthMode()">Create one</button>
+<header class="app-header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">🍳 KitchenQuest</div>
+            <div style="display:flex;gap:16px;align-items:center;">
+                <span style="color:var(--text-secondary);font-size:15px;font-weight:600;" id="user-display">👨‍🍳 Chef</span>
+                <button class="btn" onclick="resetApp()">Reset Data</button>
             </div>
         </div>
-        
-        <div id="signup-form" style="display:none;">
-            <input type="email" id="signup-email" class="auth-input" placeholder="Email" autocomplete="email">
-            <input type="password" id="signup-password" class="auth-input" placeholder="Password (min 6 characters)" autocomplete="new-password">
-            <input type="password" id="signup-password-confirm" class="auth-input" placeholder="Confirm Password" autocomplete="new-password">
-            <button id="signup-btn" class="auth-btn auth-btn-secondary">Create Account</button>
-            <div class="auth-link">
-                Already have an account? <button onclick="toggleAuthMode()">Sign in</button>
-            </div>
-        </div>
-        
-        <p id="auth-error" class="auth-error"></p>
     </div>
-</div>
+</header>
 
-<!-- App Content -->
-<div id="app-content">
-    <header class="app-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">KitchenQuest</div>
-                <div style="display:flex;gap:16px;align-items:center;">
-                    <span style="color:var(--text-secondary);font-size:15px;font-weight:600;" id="user-display">👨‍🍳 Chef</span>
-                    <button class="btn" id="signout-btn">Sign Out</button>
-                </div>
-            </div>
-        </div>
-    </header>
-    
-    <main class="container" id="main-content"></main>
-    
-    <nav class="bottom-nav">
-        <div class="nav-items">
-            <button class="nav-item active" data-page="home">
-                <span style="font-size:26px;">🏠</span>
-                <span style="font-size:11px;font-weight:700;">Home</span>
-            </button>
-            <button class="nav-item" data-page="discover">
-                <span style="font-size:26px;">🔍</span>
-                <span style="font-size:11px;font-weight:700;">Discover</span>
-            </button>
-            <button class="nav-item" data-page="cookbooks">
-                <span style="font-size:26px;">📚</span>
-                <span style="font-size:11px;font-weight:700;">Cookbooks</span>
-            </button>
-            <button class="nav-item" data-page="create">
-                <span style="font-size:26px;">✏️</span>
-                <span style="font-size:11px;font-weight:700;">Create</span>
-            </button>
-            <button class="nav-item" data-page="pantry">
-                <span style="font-size:26px;">📦</span>
-                <span style="font-size:11px;font-weight:700;">Pantry</span>
-            </button>
-        </div>
-    </nav>
-</div>
+<main class="container" id="main-content"></main>
+
+<nav class="bottom-nav">
+    <div class="nav-items">
+        <button class="nav-item active" data-page="home">
+            <span style="font-size:26px;">🏠</span>
+            <span style="font-size:11px;font-weight:700;">Home</span>
+        </button>
+        <button class="nav-item" data-page="discover">
+            <span style="font-size:26px;">🔍</span>
+            <span style="font-size:11px;font-weight:700;">Discover</span>
+        </button>
+        <button class="nav-item" data-page="cookbooks">
+            <span style="font-size:26px;">📚</span>
+            <span style="font-size:11px;font-weight:700;">Cookbooks</span>
+        </button>
+        <button class="nav-item" data-page="create">
+            <span style="font-size:26px;">✏️</span>
+            <span style="font-size:11px;font-weight:700;">Create</span>
+        </button>
+        <button class="nav-item" data-page="pantry">
+            <span style="font-size:26px;">📦</span>
+            <span style="font-size:11px;font-weight:700;">Pantry</span>
+        </button>
+    </div>
+</nav>
 
 <!-- Recipe Modal -->
 <div id="recipe-modal" class="modal">
@@ -680,58 +575,69 @@
     <div id="toast-message"></div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
 <script>
 // ==================== CONFIG ====================
 const SPOONACULAR_API_KEY = '31518764c8b441208a59aa10481ee0ad';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDYmd_WfNuEjxfjBmXB3dpSl2ozcQqTqmc",
-    authDomain: "kitchenquest-pro.firebaseapp.com",
-    projectId: "kitchenquest-pro",
-    storageBucket: "kitchenquest-pro.firebasestorage.app",
-    messagingSenderId: "1051745419180",
-    appId: "1:1051745419180:web:d314309e15003d89dd0409"
-};
+// ==================== LOCAL STORAGE ====================
+function saveData() {
+    localStorage.setItem('kitchenquest_data', JSON.stringify({
+        user: state.user,
+        cookbooks: state.cookbooks,
+        userRecipes: state.userRecipes,
+        pantry: state.pantry
+    }));
+    console.log('💾 Data saved to localStorage');
+}
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+function loadData() {
+    const saved = localStorage.getItem('kitchenquest_data');
+    if (saved) {
+        const data = JSON.parse(saved);
+        state.user = data.user || state.user;
+        state.cookbooks = data.cookbooks || [];
+        state.userRecipes = data.userRecipes || [];
+        state.pantry = data.pantry || state.pantry;
+        console.log('✅ Loaded data:', data);
+    } else {
+        console.log('📝 No saved data - starting fresh');
+        // Create default cookbook
+        createCookbook('Saved Recipes', 'My favorite recipes');
+    }
+}
+
+function resetApp() {
+    if (confirm('⚠️ This will delete all your data. Are you sure?')) {
+        localStorage.removeItem('kitchenquest_data');
+        location.reload();
+    }
+}
 
 // ==================== STATE ====================
 let state = {
     user: {
-        id: null,
-        email: null,
         name: 'Chef',
         level: 1,
         xp: 0,
         xpToNext: 500,
-        totalMealsCooked: 0,
-        isPremium: false
+        totalMealsCooked: 0
     },
     cookbooks: [],
     userRecipes: [],
-    communityRecipes: [],
     pantry: ['salt', 'pepper', 'olive oil', 'eggs', 'milk', 'flour', 'butter'],
     currentPage: 'home',
     discoveredRecipes: [],
     activeCookbook: null,
     searchQuery: '',
     selectedCuisine: '',
-    selectedSource: 'all',
     isLoading: false,
     pendingRecipeForCookbook: null
 };
 
 // ==================== SPOONACULAR API ====================
 async function searchRecipes(query = '', cuisine = '') {
-    if (SPOONACULAR_API_KEY === '31518764c8b441208a59aa10481ee0ad') {
-        showToast('⚠️ Please add your Spoonacular API key');
+    if (SPOONACULAR_API_KEY === 'YOUR_API_KEY_HERE') {
+        showToast('⚠️ Add Spoonacular API key or using demo recipes');
         return loadDemoRecipes();
     }
     
@@ -755,7 +661,7 @@ async function searchRecipes(query = '', cuisine = '') {
                 readyInMinutes: r.readyInMinutes || 30,
                 servings: r.servings || 4,
                 cuisines: r.cuisines || [],
-                extendedIngredients: r.extendedIngredients || [],
+                ingredients: r.extendedIngredients ? r.extendedIngredients.map(i => i.original) : [],
                 instructions: r.instructions || '',
                 sourceUrl: r.sourceUrl,
                 source: 'spoonacular'
@@ -773,160 +679,97 @@ async function searchRecipes(query = '', cuisine = '') {
 
 function loadDemoRecipes() {
     state.discoveredRecipes = [
-        { id: 'demo_1', title: "Pasta Carbonara", image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400", readyInMinutes: 25, servings: 4, cuisines: ["Italian"], source: 'demo', extendedIngredients: [{original: "400g spaghetti"}, {original: "200g bacon"}, {original: "3 eggs"}, {original: "100g parmesan"}], instructions: 'Cook pasta, fry bacon, mix with eggs and cheese' },
-        { id: 'demo_2', title: "Chicken Stir Fry", image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400", readyInMinutes: 20, servings: 2, cuisines: ["Asian"], source: 'demo', extendedIngredients: [{original: "300g chicken breast"}, {original: "Mixed vegetables"}, {original: "Soy sauce"}], instructions: 'Stir-fry chicken and vegetables with soy sauce' },
-        { id: 'demo_3', title: "Greek Salad", image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400", readyInMinutes: 15, servings: 2, cuisines: ["Greek"], source: 'demo', extendedIngredients: [{original: "Tomatoes"}, {original: "Cucumber"}, {original: "Feta cheese"}, {original: "Olives"}], instructions: 'Chop vegetables, add feta and olives, dress with olive oil' }
+        { 
+            id: 'demo_1', 
+            title: "Pasta Carbonara", 
+            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400", 
+            readyInMinutes: 25, 
+            servings: 4, 
+            cuisines: ["Italian"], 
+            source: 'demo', 
+            ingredients: ["400g spaghetti", "200g bacon", "3 eggs", "100g parmesan cheese", "Black pepper", "Salt"], 
+            instructions: 'Cook pasta according to package. Fry bacon until crispy. Beat eggs with parmesan. Drain pasta, mix with bacon and egg mixture off heat. Season with pepper.' 
+        },
+        { 
+            id: 'demo_2', 
+            title: "Chicken Stir Fry", 
+            image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400", 
+            readyInMinutes: 20, 
+            servings: 2, 
+            cuisines: ["Asian"], 
+            source: 'demo', 
+            ingredients: ["300g chicken breast", "Mixed vegetables", "2 tbsp soy sauce", "1 tbsp sesame oil", "Garlic", "Ginger"], 
+            instructions: 'Cut chicken into strips. Heat oil in wok, cook chicken until done. Add vegetables and stir-fry. Add soy sauce and seasonings. Serve with rice.' 
+        },
+        { 
+            id: 'demo_3', 
+            title: "Greek Salad", 
+            image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400", 
+            readyInMinutes: 15, 
+            servings: 2, 
+            cuisines: ["Greek"], 
+            source: 'demo', 
+            ingredients: ["4 tomatoes", "1 cucumber", "200g feta cheese", "Olives", "Olive oil", "Oregano"], 
+            instructions: 'Chop tomatoes and cucumber. Add cubed feta and olives. Dress with olive oil and sprinkle oregano. Toss gently and serve.' 
+        }
     ];
 }
 
-// ==================== COMMUNITY RECIPES ====================
-async function searchCommunityRecipes(query = '') {
-    state.isLoading = true;
-    render();
-    
-    try {
-        let queryRef = db.collection('publicRecipes')
-            .where('isPublic', '==', true)
-            .limit(20);
-        
-        const snapshot = await queryRef.get();
-        state.communityRecipes = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            source: 'community'
-        }));
-        
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            state.communityRecipes = state.communityRecipes.filter(r => 
-                r.title.toLowerCase().includes(lowerQuery)
-            );
-        }
-    } catch (error) {
-        console.error('Error loading community recipes:', error);
-    }
-    
-    state.isLoading = false;
-    render();
-}
-
-async function loadAllRecipes(query = '', cuisine = '') {
-    state.isLoading = true;
-    render();
-    
-    await Promise.all([
-        searchRecipes(query, cuisine),
-        searchCommunityRecipes(query)
-    ]);
-    
-    if (state.selectedSource === 'all') {
-        state.discoveredRecipes = [...state.discoveredRecipes, ...state.communityRecipes];
-    } else if (state.selectedSource === 'community') {
-        state.discoveredRecipes = state.communityRecipes;
-    }
-    
-    state.isLoading = false;
-    render();
-}
-
-// ==================== FIRESTORE OPERATIONS ====================
+// ==================== COOKBOOK OPERATIONS ====================
 function createCookbook(name, description = '') {
-    return new Promise((resolve, reject) => {
-        name = name ? name.trim() : '';
-        
-        if (!name) {
-            showToast('⚠️ Please enter a cookbook name');
-            resolve(false);
-            return;
-        }
-        
-        console.log('📚 CREATING COOKBOOK:', name);
-        
-        const cookbook = {
-            name: name,
-            description: description.trim(),
-            userId: state.user.id,
-            recipes: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            isPublic: false
-        };
-        
-        db.collection('cookbooks').add(cookbook)
-            .then((docRef) => {
-                console.log('✅ SUCCESS! Cookbook ID:', docRef.id);
-                
-                cookbook.id = docRef.id;
-                cookbook.createdAt = new Date();
-                state.cookbooks.push(cookbook);
-                
-                showToast(`✅ Created: ${name}`);
-                render();
-                resolve(true);
-            })
-            .catch((error) => {
-                console.error('❌ FIRESTORE ERROR:', error);
-                console.error('Error code:', error.code);
-                console.error('Error message:', error.message);
-                showToast('Failed: ' + error.message);
-                reject(error);
-            });
-    });
-}
-
-async function loadUserCookbooks() {
-    console.log('📚 LOADING cookbooks for user:', state.user.id);
+    name = name ? name.trim() : '';
     
-    try {
-        const snapshot = await db.collection('cookbooks')
-            .where('userId', '==', state.user.id)
-            .get();
-        
-        state.cookbooks = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-        
-        console.log('✅ LOADED', state.cookbooks.length, 'cookbooks');
-        state.cookbooks.forEach(cb => console.log('  -', cb.name, '('+cb.recipes.length+' recipes)'));
-    } catch (error) {
-        console.error('❌ ERROR loading cookbooks:', error);
+    if (!name) {
+        showToast('⚠️ Please enter a cookbook name');
+        return false;
     }
+    
+    console.log('📚 Creating cookbook:', name);
+    
+    const cookbook = {
+        id: 'cb_' + Date.now(),
+        name: name,
+        description: description.trim(),
+        recipes: [],
+        createdAt: new Date().toISOString()
+    };
+    
+    state.cookbooks.push(cookbook);
+    saveData();
+    
+    showToast(`✅ Created: ${name}`);
+    console.log('✅ Cookbook created:', cookbook);
+    render();
+    return true;
 }
 
-async function addRecipeToCookbook(recipeData, cookbookId) {
-    try {
-        console.log('➕ ADDING recipe:', recipeData.title, 'to cookbook:', cookbookId);
-        
-        const cookbook = state.cookbooks.find(c => c.id === cookbookId);
-        if (!cookbook) {
-            showToast('❌ Cookbook not found');
-            return;
-        }
-        
-        if (cookbook.recipes.find(r => r.id === recipeData.id)) {
-            showToast('Already in this cookbook');
-            return;
-        }
-        
-        cookbook.recipes.push(recipeData);
-        
-        await db.collection('cookbooks').doc(cookbookId).update({
-            recipes: cookbook.recipes
-        });
-        
-        console.log('✅ RECIPE ADDED successfully');
-        showToast(`✅ Added to ${cookbook.name}!`);
-        closeCookbookModal();
-        closeRecipeModal();
-        render();
-    } catch (error) {
-        console.error('❌ ERROR adding recipe:', error);
-        showToast('Failed: ' + error.message);
+function addRecipeToCookbook(recipeData, cookbookId) {
+    console.log('➕ Adding recipe to cookbook:', recipeData.title, '→', cookbookId);
+    
+    const cookbook = state.cookbooks.find(c => c.id === cookbookId);
+    if (!cookbook) {
+        showToast('❌ Cookbook not found');
+        return;
     }
+    
+    if (cookbook.recipes.find(r => r.id === recipeData.id)) {
+        showToast('Already in this cookbook');
+        return;
+    }
+    
+    cookbook.recipes.push(recipeData);
+    saveData();
+    
+    console.log('✅ Recipe added successfully');
+    showToast(`✅ Added to ${cookbook.name}!`);
+    closeCookbookModal();
+    closeRecipeModal();
+    render();
 }
 
-async function createUserRecipe(recipeData, isPublic = true) {
+function createUserRecipe(recipeData) {
     const recipe = {
+        id: 'recipe_' + Date.now(),
         title: recipeData.title,
         image: recipeData.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
         readyInMinutes: parseInt(recipeData.readyInMinutes) || 30,
@@ -934,37 +777,15 @@ async function createUserRecipe(recipeData, isPublic = true) {
         ingredients: recipeData.ingredients || [],
         instructions: recipeData.instructions || '',
         cuisines: recipeData.cuisines || [],
-        userId: state.user.id,
-        userName: state.user.name || state.user.email.split('@')[0],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        isPublic: isPublic,
+        createdAt: new Date().toISOString(),
         source: 'user'
     };
     
-    const userRecipeRef = await db.collection('userRecipes').add(recipe);
-    recipe.id = userRecipeRef.id;
     state.userRecipes.push(recipe);
+    saveData();
     
-    if (isPublic) {
-        await db.collection('publicRecipes').doc(userRecipeRef.id).set(recipe);
-        showToast('🎉 Published to community!');
-    } else {
-        showToast('🔒 Saved privately!');
-    }
-    
+    showToast('✅ Recipe created!');
     return recipe;
-}
-
-async function loadUserRecipes() {
-    const snapshot = await db.collection('userRecipes')
-        .where('userId', '==', state.user.id)
-        .orderBy('createdAt', 'desc')
-        .get();
-    
-    state.userRecipes = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
 }
 
 // ==================== MODALS ====================
@@ -973,8 +794,6 @@ function openRecipeModal(recipeId, source = 'discovered') {
     
     if (source === 'user') {
         recipe = state.userRecipes.find(r => r.id === recipeId);
-    } else if (source === 'community') {
-        recipe = state.communityRecipes.find(r => r.id === recipeId);
     } else {
         recipe = state.discoveredRecipes.find(r => r.id === recipeId);
     }
@@ -988,9 +807,6 @@ function openRecipeModal(recipeId, source = 'discovered') {
     
     const modal = document.getElementById('modal-body');
     const isSaved = state.cookbooks.some(cb => cb.recipes.find(r => r.id === recipe.id));
-    
-    const ingredients = recipe.ingredients || 
-                       (recipe.extendedIngredients ? recipe.extendedIngredients.map(i => i.original) : []);
     
     modal.innerHTML = `
         <img src="${recipe.image}" class="modal-image" alt="${recipe.title}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
@@ -1006,12 +822,6 @@ function openRecipeModal(recipeId, source = 'discovered') {
                     <span style="font-size:24px;">👥</span>
                     <span>${recipe.servings} servings</span>
                 </div>
-                ${recipe.source === 'user' || recipe.source === 'community' ? `
-                    <div class="modal-meta-item">
-                        <span style="font-size:24px;">👨‍🍳</span>
-                        <span>by ${recipe.userName}</span>
-                    </div>
-                ` : ''}
             </div>
             
             ${recipe.cuisines && recipe.cuisines.length > 0 ? `
@@ -1020,10 +830,10 @@ function openRecipeModal(recipeId, source = 'discovered') {
                 </div>
             ` : ''}
             
-            ${ingredients.length > 0 ? `
+            ${recipe.ingredients && recipe.ingredients.length > 0 ? `
                 <h2 style="font-size:24px;margin-bottom:20px;font-weight:900;">📝 Ingredients</h2>
                 <ul class="ingredients-list">
-                    ${ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                    ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
                 </ul>
             ` : ''}
             
@@ -1037,11 +847,11 @@ function openRecipeModal(recipeId, source = 'discovered') {
             ` : ''}
             
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px;">
-                <button class="auth-btn auth-btn-secondary" onclick="openAddToCookbookModal()">
+                <button class="btn btn-secondary" onclick="openAddToCookbookModal()">
                     + Add to Cookbook
                 </button>
                 ${isSaved ? `
-                    <button class="auth-btn auth-btn-primary" onclick="cookRecipe('${recipe.id}')">
+                    <button class="btn btn-primary" onclick="cookRecipe('${recipe.id}')">
                         🔥 Cook This (+50 XP)
                     </button>
                 ` : ''}
@@ -1087,7 +897,7 @@ function openAddToCookbookModal() {
                 </div>
             `}
             
-            <button class="auth-btn auth-btn-secondary" onclick="promptCreateCookbookFromModal()">
+            <button class="btn btn-secondary" onclick="promptCreateCookbookFromModal()" style="width:100%;">
                 + Create New Cookbook
             </button>
         </div>
@@ -1108,25 +918,19 @@ function closeCookbookModal() {
 
 function promptCreateCookbook() {
     const name = prompt('Cookbook name:');
-    console.log('USER ENTERED:', name);
     if (name) {
-        createCookbook(name).then(success => {
-            console.log('CREATE RESULT:', success);
-        }).catch(err => {
-            console.error('CREATE ERROR:', err);
-        });
+        createCookbook(name);
     }
 }
 
 function promptCreateCookbookFromModal() {
     const name = prompt('Cookbook name:');
     if (name) {
-        createCookbook(name).then((success) => {
-            if (success) {
-                closeCookbookModal();
-                setTimeout(() => openAddToCookbookModal(), 300);
-            }
-        }).catch(err => console.error(err));
+        const success = createCookbook(name);
+        if (success) {
+            closeCookbookModal();
+            setTimeout(() => openAddToCookbookModal(), 300);
+        }
     }
 }
 
@@ -1138,143 +942,19 @@ document.getElementById('cookbook-modal').addEventListener('click', function(e) 
     if (e.target === this) closeCookbookModal();
 });
 
-// ==================== AUTH ====================
-function toggleAuthMode() {
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-    document.getElementById('auth-error').textContent = '';
-    
-    if (signinForm.style.display === 'none') {
-        signinForm.style.display = 'block';
-        signupForm.style.display = 'none';
-    } else {
-        signinForm.style.display = 'none';
-        signupForm.style.display = 'block';
-    }
-}
-
-document.getElementById('signup-btn').addEventListener('click', async () => {
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-password-confirm').value;
-    const authError = document.getElementById('auth-error');
-    const signupBtn = document.getElementById('signup-btn');
-    
-    authError.textContent = '';
-    
-    if (password !== confirmPassword) {
-        authError.textContent = 'Passwords do not match';
-        return;
-    }
-    
-    if (password.length < 6) {
-        authError.textContent = 'Password must be at least 6 characters';
-        return;
-    }
-    
-    signupBtn.disabled = true;
-    signupBtn.textContent = 'Creating...';
-    
-    try {
-        const result = await auth.createUserWithEmailAndPassword(email, password);
-        
-        await db.collection('users').doc(result.user.uid).set({
-            email: result.user.email,
-            name: 'Chef',
-            level: 1,
-            xp: 0,
-            xpToNext: 500,
-            pantry: state.pantry,
-            totalMealsCooked: 0,
-            isPremium: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showToast('🎉 Account created!');
-    } catch (error) {
-        authError.textContent = error.message;
-        signupBtn.disabled = false;
-        signupBtn.textContent = 'Create Account';
-    }
-});
-
-document.getElementById('signin-btn').addEventListener('click', async () => {
-    const email = document.getElementById('signin-email').value;
-    const password = document.getElementById('signin-password').value;
-    const authError = document.getElementById('auth-error');
-    const signinBtn = document.getElementById('signin-btn');
-    
-    authError.textContent = '';
-    signinBtn.disabled = true;
-    signinBtn.textContent = 'Signing in...';
-    
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-        showToast('👋 Welcome back!');
-    } catch (error) {
-        authError.textContent = error.message;
-        signinBtn.disabled = false;
-        signinBtn.textContent = 'Sign In';
-    }
-});
-
-document.getElementById('signout-btn').addEventListener('click', () => {
-    auth.signOut();
-    showToast('Signed out');
-});
-
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        console.log('👤 USER LOGGED IN:', user.email);
-        console.log('User ID:', user.uid);
-        
-        state.user.id = user.uid;
-        state.user.email = user.email;
-        
-        document.getElementById('user-display').textContent = `👨‍🍳 ${user.email.split('@')[0]}`;
-        
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app-content').classList.add('show');
-        
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                const data = doc.data();
-                state.user = { ...state.user, ...data };
-                state.pantry = data.pantry || state.pantry;
-            }
-            
-            await loadUserCookbooks();
-            await loadUserRecipes();
-            
-            // Create default "Saved" cookbook if none exist
-            if (state.cookbooks.length === 0) {
-                console.log('📚 NO COOKBOOKS - Creating default "Saved" cookbook');
-                await createCookbook('Saved', 'My saved recipes');
-            } else {
-                console.log('📚 USER HAS', state.cookbooks.length, 'COOKBOOKS');
-            }
-        } catch (error) {
-            console.error('❌ ERROR during init:', error);
-        }
-        
-        if (state.discoveredRecipes.length === 0) {
-            await loadAllRecipes();
-        }
-        
-        init();
-    } else {
-        console.log('🚪 No user logged in');
-        document.getElementById('auth-screen').style.display = 'block';
-        document.getElementById('app-content').classList.remove('show');
-    }
-});
-
 // ==================== APP FUNCTIONS ====================
 function init() {
+    loadData();
     setupNavigation();
+    
+    if (state.discoveredRecipes.length === 0) {
+        loadDemoRecipes();
+    }
+    
     render();
-    console.log('✅ APP READY');
+    console.log('✅ KitchenQuest Ready!');
+    console.log('📚 Cookbooks:', state.cookbooks.length);
+    console.log('📖 User Recipes:', state.userRecipes.length);
 }
 
 function setupNavigation() {
@@ -1292,20 +972,15 @@ function setupNavigation() {
 function handleSearch() {
     const query = document.getElementById('recipe-search-input').value;
     state.searchQuery = query;
-    loadAllRecipes(query, state.selectedCuisine);
+    searchRecipes(query, state.selectedCuisine);
 }
 
 function selectCuisine(cuisine) {
     state.selectedCuisine = state.selectedCuisine === cuisine ? '' : cuisine;
-    loadAllRecipes(state.searchQuery, state.selectedCuisine);
+    searchRecipes(state.searchQuery, state.selectedCuisine);
 }
 
-function selectSource(source) {
-    state.selectedSource = source;
-    loadAllRecipes(state.searchQuery, state.selectedCuisine);
-}
-
-async function cookRecipe(recipeId) {
+function cookRecipe(recipeId) {
     state.user.xp += 50;
     state.user.totalMealsCooked++;
     
@@ -1318,13 +993,7 @@ async function cookRecipe(recipeId) {
         showToast(`+50 XP`);
     }
     
-    await db.collection('users').doc(state.user.id).update({
-        xp: state.user.xp,
-        level: state.user.level,
-        xpToNext: state.user.xpToNext,
-        totalMealsCooked: state.user.totalMealsCooked
-    });
-    
+    saveData();
     closeRecipeModal();
     render();
 }
@@ -1337,7 +1006,7 @@ function render() {
         content.innerHTML = `
             <div class="hero">
                 <h1>Welcome back, ${state.user.name}! 👋</h1>
-                <p style="font-size:18px;opacity:0.95;margin-top:8px;">Level ${state.user.level} Chef ${state.user.isPremium ? '⭐' : ''}</p>
+                <p style="font-size:18px;opacity:0.95;margin-top:8px;">Level ${state.user.level} Chef</p>
                 <div class="hero-stats">
                     <div class="hero-stat">
                         <div class="hero-stat-value">${state.user.totalMealsCooked}</div>
@@ -1361,13 +1030,13 @@ function render() {
             <div class="card">
                 <h2 style="font-size:28px;margin-bottom:20px;">🍳 Quick Actions</h2>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
-                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('discover')">
+                    <button class="btn btn-primary" onclick="navigateTo('discover')">
                         🔍 Discover Recipes
                     </button>
-                    <button class="auth-btn auth-btn-secondary" onclick="navigateTo('create')">
+                    <button class="btn btn-secondary" onclick="navigateTo('create')">
                         ✏️ Create Recipe
                     </button>
-                    <button class="auth-btn auth-btn-primary" onclick="navigateTo('cookbooks')">
+                    <button class="btn btn-primary" onclick="navigateTo('cookbooks')">
                         📚 My Cookbooks (${state.cookbooks.length})
                     </button>
                 </div>
@@ -1387,13 +1056,6 @@ function render() {
                        value="${state.searchQuery}"
                        onkeypress="if(event.key==='Enter')handleSearch()">
                 <button class="search-btn" onclick="handleSearch()">Search</button>
-            </div>
-            
-            <div style="margin-bottom:16px;color:var(--text-secondary);font-size:15px;font-weight:700;">Source:</div>
-            <div class="filter-chips">
-                <button class="chip ${state.selectedSource === 'all' ? 'active' : ''}" onclick="selectSource('all')">All Recipes</button>
-                <button class="chip ${state.selectedSource === 'spoonacular' ? 'active' : ''}" onclick="selectSource('spoonacular')">Spoonacular</button>
-                <button class="chip ${state.selectedSource === 'community' ? 'active' : ''}" onclick="selectSource('community')">Community</button>
             </div>
             
             <div style="margin-bottom:16px;color:var(--text-secondary);font-size:15px;font-weight:700;">Cuisine:</div>
@@ -1424,13 +1086,11 @@ function render() {
                         return `
                             <div class="recipe-card" onclick="openRecipeModal('${r.id}', '${r.source}')">
                                 ${isSaved ? '<div class="saved-badge">✓ Saved</div>' : ''}
-                                ${r.source === 'community' ? '<div class="saved-badge" style="background:var(--secondary);left:16px;right:auto;">👥 Community</div>' : ''}
                                 <img src="${r.image}" class="recipe-image" alt="${r.title}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
                                 <div class="recipe-content">
                                     <h3 class="recipe-title">${r.title}</h3>
                                     <div class="recipe-meta">⏱ ${r.readyInMinutes} min • 👥 ${r.servings} servings</div>
                                     ${r.cuisines && r.cuisines.length > 0 ? r.cuisines.slice(0, 2).map(c => `<span class="tag">${c}</span>`).join('') : ''}
-                                    ${r.source === 'community' ? `<span class="tag">by ${r.userName}</span>` : ''}
                                 </div>
                             </div>
                         `;
@@ -1500,45 +1160,31 @@ function render() {
             <div class="card">
                 <h2 style="font-size:24px;margin-bottom:24px;">Create Your Recipe</h2>
                 
-                <input type="text" id="recipe-title" class="auth-input" placeholder="Recipe Title" style="margin-bottom:16px;">
-                <input type="url" id="recipe-image" class="auth-input" placeholder="Image URL (optional)" style="margin-bottom:16px;">
+                <input type="text" id="recipe-title" class="input" placeholder="Recipe Title">
+                <input type="url" id="recipe-image" class="input" placeholder="Image URL (optional)">
                 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-                    <input type="number" id="recipe-time" class="auth-input" placeholder="Cook time (minutes)">
-                    <input type="number" id="recipe-servings" class="auth-input" placeholder="Servings">
+                    <input type="number" id="recipe-time" class="input" placeholder="Cook time (minutes)">
+                    <input type="number" id="recipe-servings" class="input" placeholder="Servings">
                 </div>
                 
-                <textarea id="recipe-ingredients" class="auth-input" placeholder="Ingredients (one per line)" 
-                          style="min-height:150px;resize:vertical;font-family:inherit;"></textarea>
+                <textarea id="recipe-ingredients" class="input" placeholder="Ingredients (one per line)"></textarea>
                 
-                <textarea id="recipe-instructions" class="auth-input" placeholder="Instructions" 
-                          style="min-height:200px;resize:vertical;font-family:inherit;margin-bottom:16px;"></textarea>
+                <textarea id="recipe-instructions" class="input" placeholder="Instructions"></textarea>
                 
-                ${!state.user.isPremium ? `
-                    <div style="margin-bottom:16px;padding:16px;background:#FFF7ED;border-radius:12px;color:var(--text-secondary);">
-                        <p>✨ Free users auto-publish recipes to the community. <strong>Upgrade to Premium</strong> to keep recipes private!</p>
-                    </div>
-                ` : `
-                    <label class="checkbox-label" style="margin-bottom:16px;">
-                        <input type="checkbox" id="manual-recipe-public" checked>
-                        <span>Make this recipe public for others to discover</span>
-                    </label>
-                `}
-                
-                <button class="auth-btn auth-btn-secondary" onclick="submitManualRecipe()">Publish Recipe</button>
+                <button class="btn btn-secondary" onclick="submitManualRecipe()" style="width:100%;">Create Recipe</button>
             </div>
             
-            <h2 style="font-size:32px;margin:48px 0 24px;">My Published Recipes (${state.userRecipes.length})</h2>
+            <h2 style="font-size:32px;margin:48px 0 24px;">My Recipes (${state.userRecipes.length})</h2>
             
             ${state.userRecipes.length === 0 ? `
                 <div class="card" style="text-align:center;padding:60px;">
-                    <p style="font-size:18px;color:var(--text-secondary);">No recipes published yet.</p>
+                    <p style="font-size:18px;color:var(--text-secondary);">No recipes created yet.</p>
                 </div>
             ` : `
                 <div class="recipe-grid">
                     ${state.userRecipes.map(r => `
                         <div class="recipe-card" onclick="openRecipeModal('${r.id}', 'user')">
-                            ${r.isPublic ? '' : '<div class="saved-badge" style="background:var(--text);">🔒 Private</div>'}
                             <img src="${r.image}" class="recipe-image" alt="${r.title}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
                             <div class="recipe-content">
                                 <h3 class="recipe-title">${r.title}</h3>
@@ -1579,7 +1225,7 @@ function navigateTo(page) {
     render();
 }
 
-async function submitManualRecipe() {
+function submitManualRecipe() {
     const title = document.getElementById('recipe-title').value;
     const image = document.getElementById('recipe-image').value;
     const readyInMinutes = document.getElementById('recipe-time').value;
@@ -1593,8 +1239,6 @@ async function submitManualRecipe() {
     }
     
     const ingredients = ingredientsText.split('\n').filter(i => i.trim());
-    const isPublicCheckbox = document.getElementById('manual-recipe-public');
-    const isPublic = !state.user.isPremium || (isPublicCheckbox && isPublicCheckbox.checked);
     
     const recipe = {
         title: title.trim(),
@@ -1606,7 +1250,7 @@ async function submitManualRecipe() {
         cuisines: []
     };
     
-    await createUserRecipe(recipe, isPublic);
+    createUserRecipe(recipe);
     
     document.getElementById('recipe-title').value = '';
     document.getElementById('recipe-image').value = '';
@@ -1624,10 +1268,13 @@ function showToast(message) {
     setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
 }
 
-console.log('🍳 KitchenQuest Production Ready');
-console.log('📚 Cookbooks: Working with extensive debugging');
-console.log('✏️ Recipe Creation: Manual entry fully functional');
-console.log('🔍 Recipe Search: Spoonacular + Community recipes');
+// ==================== INIT ====================
+init();
+
+console.log('🍳 KitchenQuest - localStorage Version');
+console.log('✅ No Firebase needed');
+console.log('✅ All data stored locally in your browser');
+console.log('✅ Works offline');
 </script>
 
 </body>
