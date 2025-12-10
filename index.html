@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KitchenQuest - Your Recipe Companion</title>
+    <title>TasteBudKitchen - Your Recipe Companion</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -574,7 +574,7 @@
 <header class="app-header">
     <div class="container">
         <div class="header-content">
-            <div class="logo">🍳 KitchenQuest</div>
+            <div class="logo">🍳 TasteBudKitchen</div>
             <div style="display:flex;gap:16px;align-items:center;">
                 <span style="color:var(--text-secondary);font-size:15px;font-weight:600;" id="user-display">👨‍🍳 Chef</span>
                 <button class="btn" onclick="openSettings()">Settings</button>
@@ -703,7 +703,7 @@ let state = {
 
 // ==================== LOCAL STORAGE ====================
 function saveData() {
-    localStorage.setItem('kitchenquest_data', JSON.stringify({
+    localStorage.setItem('TasteBudKitchen_data', JSON.stringify({
         apiKeys: state.apiKeys,
         user: state.user,
         cookbooks: state.cookbooks,
@@ -714,7 +714,7 @@ function saveData() {
 }
 
 function loadData() {
-    const saved = localStorage.getItem('kitchenquest_data');
+    const saved = localStorage.getItem('TasteBudKitchen_data');
     if (saved) {
         const data = JSON.parse(saved);
         state.apiKeys = data.apiKeys || state.apiKeys;
@@ -732,7 +732,7 @@ function loadData() {
 
 function resetApp() {
     if (confirm('⚠️ This will delete all your data. Are you sure?')) {
-        localStorage.removeItem('kitchenquest_data');
+        localStorage.removeItem('TasteBudKitchen_data');
         location.reload();
     }
 }
@@ -1318,7 +1318,7 @@ function init() {
     }
     
     render();
-    console.log('✅ KitchenQuest Ready!');
+    console.log('✅ TasteBudKitchen Ready!');
     console.log('📚 Cookbooks:', state.cookbooks.length);
     console.log('📖 User Recipes:', state.userRecipes.length);
     console.log('🔑 Spoonacular Key:', state.apiKeys.spoonacular ? 'Present' : 'Missing');
@@ -1733,7 +1733,7 @@ function showToast(message) {
 // ==================== INIT ====================
 init();
 
-console.log('🍳 KitchenQuest - Enhanced AI Version');
+console.log('🍳 TasteBudKitchen - Enhanced AI Version');
 console.log('✅ Auto-saves to "Uploaded Recipes" cookbook');
 console.log('✅ Extensive error logging for AI debugging');
 console.log('✅ Open Console (F12) to see detailed logs');
